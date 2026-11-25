@@ -1,0 +1,8 @@
+name = "my-ai-rewards-app"
+main = "worker.js"
+compatibility_date = "2026-11-25"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-rewards-db"
+database_id = "34b547b6-2a70-433c-89b3-5bd83c1e2f4a"
