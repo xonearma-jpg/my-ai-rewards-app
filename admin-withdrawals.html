@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Withdrawal Review — TrainAI Uganda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <header class="border-b border-slate-800 bg-slate-900">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+      <a href="/admin.html" class="font-bold text-sky-400">TrainAI<span class="text-white">.ug</span></a>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Withdrawal administration</span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <section class="mb-7 rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+      <h1 class="text-2xl font-bold">Withdrawal requests</h1>
+      <p class="mt-2 text-sm leading-6 text-slate-400">
+        Enter the private administrator key. This page does not save it in your browser.
+        Verify each transfer in your Mobile Money account before marking it paid.
+      </p>
+      <form id="authForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
+        <input id="adminKey" type="password" autocomplete="off" required placeholder="Admin API key"
+          class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-sky-400" />
+        <button class="rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-sky-400" type="submit">Load requests</button>
+      </form>
+      <p id="status" role="status" class="mt-3 text-sm text-slate-400">Admin access is required.</p>
+    </section>
+
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h2 class="text-lg font-bold">Pending withdrawals</h2>
+      <button id="refreshButton" type="button" class="hidden rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-sky-400">Refresh</button>
+    </div>
+    <section id="withdrawalList" class="space-y-4"></section>
+    <p class="mt-8 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs leading-5 text-amber-200">
+      Important: marking a request as paid only updates your app records. It does not send Mobile Money.
+      Send the payment manually through the correct MTN or Airtel channel, confirm success, then mark it paid.
+      Rejecting a request automatically refunds the amount to the user's available wallet balance.
+    </p>
+  </main>
+
+  <script>
+    let adminKey = "";
+    const list = document.getElementById("withdrawalList");
+    const statusLine = document.getElementById("status");
+    const refreshButton = document.getElementById("refreshButton");
+
+    function node(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function setStatus(message, error = false) {
+      statusLine.textContent = message;
+      statusLine.className = "mt-3 text-sm " + (error ? "text-rose-300" : "text-slate-400");
+    }
+
+    async function loadWithdrawals() {
+      if (!adminKey) return;
+      setStatus("Loading pending withdrawals…");
+      refreshButton.disabled = true;
+      try {
+        const response = await fetch("/api/admin/withdrawals", {
+          headers: { "Authorization": "Bearer " + adminKey },
+          cache: "no-store"
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Could not load withdrawals.");
+        list.replaceChildren();
+        const withdrawals = data.withdrawals || [];
+        if (!withdrawals.length) {
+          list.append(node("div", "rounded-2xl border border-slate-800 bg-slate-900 p-6 text-sm text-slate-400", "There are no pending withdrawal requests."));
+        }
+        withdrawals.forEach(renderWithdrawal);
+        setStatus(withdrawals.length + " pending withdrawal(s) loaded.");
+        refreshButton.classList.remove("hidden");
+      } catch (error) {
+        setStatus(error.message, true);
+        if (/key is missing or incorrect/i.test(error.message)) {
+          adminKey = "";
+          document.getElementById("adminKey").value = "";
+        }
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function renderWithdrawal(item) {
+      const card = node("article", "rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6");
+      const top = node("div", "flex flex-wrap items-start justify-between gap-3");
+      const info = node("div", "min-w-0");
+      info.append(
+        node("h3", "text-lg font-bold", (item.full_name || "User") + " · " + (item.email || "No email")),
+        node("p", "mt-1 text-sm text-slate-400", "Requested: " + (item.created_at || "Unknown")),
+        node("p", "mt-1 text-xs text-slate-500 break-all", "Request ID: " + item.id)
+      );
+      top.append(
+        info,
+        node("span", "rounded-full bg-amber-500/10 px-3 py-1 text-sm font-bold text-amber-300",
+          Number(item.amount_ugx || 0).toLocaleString() + " UGX")
+      );
+      card.append(top);
+
+      const destination = node("div", "mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4");
+      destination.append(
+        node("p", "text-xs uppercase tracking-wider text-slate-500", "Payment destination"),
+        node("p", "mt-1 text-base font-bold", item.mobile_money_network + " Money"),
+        node("p", "mt-1 text-lg font-semibold text-sky-200", item.mobile_money_number)
+      );
+      card.append(destination);
+
+      const actions = node("div", "mt-5 flex flex-wrap gap-3");
+      const paid = node("button", "rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50", "Mark paid");
+      const reject = node("button", "rounded-xl border border-rose-500/40 px-5 py-3 text-sm font-semibold text-rose-300 hover:bg-rose-500/10 disabled:opacity-50", "Reject and refund");
+      paid.type = reject.type = "button";
+      paid.addEventListener("click", () => processWithdrawal(item, "paid", paid, reject));
+      reject.addEventListener("click", () => processWithdrawal(item, "reject", paid, reject));
+      actions.append(paid, reject);
+      card.append(actions);
+      list.append(card);
+    }
+
+    async function processWithdrawal(item, decision, paidButton, rejectButton) {
+      const message = decision === "paid"
+        ? "Only continue if you have already sent and confirmed " + Number(item.amount_ugx).toLocaleString() + " UGX to " + item.mobile_money_network + " number " + item.mobile_money_number + ". Mark this request as paid?"
+        : "Reject this withdrawal? " + Number(item.amount_ugx).toLocaleString() + " UGX will be refunded to the user's available wallet balance.";
+      if (!window.confirm(message)) return;
+
+      paidButton.disabled = rejectButton.disabled = true;
+      try {
+        const response = await fetch("/api/admin/withdrawals", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + adminKey
+          },
+          body: JSON.stringify({ withdrawalId: item.id, decision })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Could not process withdrawal.");
+        setStatus(data.message || "Withdrawal processed.");
+        await loadWithdrawals();
+      } catch (error) {
+        setStatus(error.message, true);
+        paidButton.disabled = rejectButton.disabled = false;
+      }
+    }
+
+    document.getElementById("authForm").addEventListener("submit", event => {
+      event.preventDefault();
+      adminKey = document.getElementById("adminKey").value.trim();
+      loadWithdrawals();
+    });
+    refreshButton.addEventListener("click", loadWithdrawals);
+  </script>
+</body>
+</html>
