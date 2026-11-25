@@ -77,7 +77,7 @@ export async function onRequestPost({ request, env }) {
         `INSERT INTO wallet_transactions
           (id, user_id, transaction_type, amount_ugx, balance_bucket,
            transaction_status, reference, notes)
-         VALUES (?, ?, 'WELCOME_BONUS', 5000, 'locked', 'locked', ?, ?)`
+         VALUES (?, ?, 'welcome_bonus_locked', 5000, 'locked', 'pending', ?, ?)`
       ).bind(crypto.randomUUID(), userId, `WELCOME-${userId}`, "Promotional welcome bonus; locked pending eligibility review")
     ]);
 
