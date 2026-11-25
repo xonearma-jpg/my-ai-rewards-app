@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#020617" />
+  <title>Register — TrainAI Uganda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center px-4 py-10">
+  <main class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
+    <div class="text-center mb-6">
+      <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold px-3 py-1 rounded-full">5,000 UGX LOCKED WELCOME BONUS</span>
+      <h1 class="text-2xl font-bold mt-4">Create Your Trainer Account</h1>
+      <p class="text-slate-400 text-sm mt-2">Register to get started with AI training surveys.</p>
+    </div>
+
+    <form id="registerForm" class="space-y-4">
+      <div>
+        <label for="fullName" class="block text-xs font-medium text-slate-400 mb-1">Full Name</label>
+        <input type="text" id="fullName" name="full_name" required autocomplete="name" maxlength="120" placeholder="e.g. Kato Mukasa"
+          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-400" />
+      </div>
+      <div>
+        <label for="phone" class="block text-xs font-medium text-slate-400 mb-1">Mobile Money Number (MTN / Airtel)</label>
+        <input type="tel" id="phone" name="phone_number" required autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0770000000"
+          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-400" />
+      </div>
+      <div>
+        <label for="email" class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
+        <input type="email" id="email" name="email" required autocomplete="email" maxlength="254" placeholder="you@example.com"
+          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-400" />
+      </div>
+      <div>
+        <label for="password" class="block text-xs font-medium text-slate-400 mb-1">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters"
+          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-400" />
+        <p class="text-slate-500 text-xs mt-1">Use at least 10 characters. Never reuse your email password.</p>
+      </div>
+
+      <p id="errorMsg" role="alert" aria-live="polite" class="text-rose-400 text-xs hidden"></p>
+      <p id="successMsg" role="status" aria-live="polite" class="text-emerald-400 text-xs hidden"></p>
+
+      <button type="submit" id="submitBtn"
+        class="w-full bg-sky-500 hover:bg-sky-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-lg transition mt-2">
+        Register & Start Survey →
+      </button>
+    </form>
+
+    <p class="text-slate-500 text-xs leading-relaxed mt-5">
+      The welcome bonus is promotional and locked until the published eligibility conditions are met. It is not immediately withdrawable. Task rewards are subject to valid submission and review.
+    </p>
+    <p class="text-center text-sm text-slate-400 mt-5">Already registered? <a href="/dashboard.html" class="text-sky-400 hover:text-sky-300">Go to dashboard</a></p>
+  </main>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const button = document.getElementById("submitBtn");
+    const errorMessage = document.getElementById("errorMsg");
+    const successMessage = document.getElementById("successMsg");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorMessage.classList.add("hidden");
+      successMessage.classList.add("hidden");
+
+      if (!form.reportValidity()) return;
+
+      button.disabled = true;
+      button.textContent = "Creating your account...";
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: document.getElementById("fullName").value.trim(),
+            phone_number: document.getElementById("phone").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success || !data.userId) {
+          throw new Error(data.error || "We couldn't create your account. Please try again.");
+        }
+
+        localStorage.setItem("trainai_user_id", data.userId);
+        successMessage.textContent = "Account created. Opening your first survey...";
+        successMessage.classList.remove("hidden");
+        window.location.href = "/survey.html?id=onboarding";
+      } catch (error) {
+        errorMessage.textContent = error.message || "Something went wrong. Please try again.";
+        errorMessage.classList.remove("hidden");
+        button.disabled = false;
+        button.textContent = "Register & Start Survey →";
+      }
+    });
+  </script>
+</body>
+</html>
