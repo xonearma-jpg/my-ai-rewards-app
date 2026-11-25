@@ -62,13 +62,24 @@ export async function onRequest({ request, env }) {
     }
 
     const withdrawal = await env.DB.prepare(
-      `SELECT id, user_id, amount_ugx, request_status
-       FROM withdrawal_requests WHERE id = ?`
+      `SELECT w.id, w.user_id, w.amount_ugx, w.request_status,
+              EXISTS (
+                SELECT 1 FROM wallet_transactions t
+                WHERE t.reference = 'WITHDRAWAL-' || w.id
+                  AND t.user_id = w.user_id
+                  AND t.transaction_type = 'withdrawal'
+                  AND t.transaction_status = 'pending'
+              ) AS has_pending_transaction,
+              EXISTS (SELECT 1 FROM users u WHERE u.id = w.user_id) AS has_user
+       FROM withdrawal_requests w WHERE w.id = ?`
     ).bind(withdrawalId).first();
 
     if (!withdrawal) return json({ success: false, error: "Withdrawal not found." }, 404);
     if (withdrawal.request_status !== "pending") {
       return json({ success: false, error: "This withdrawal has already been processed." }, 409);
+    }
+    if (!withdrawal.has_pending_transaction || !withdrawal.has_user) {
+      return json({ success: false, error: "This request is missing a matching wallet transaction or user record. Please investigate before processing." }, 409);
     }
 
     const marker = new Date().toISOString() + "-" + crypto.randomUUID();
