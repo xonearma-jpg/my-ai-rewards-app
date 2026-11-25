@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#020617" />
+  <title>AI Training Survey — TrainAI Uganda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <nav class="border-b border-slate-800 bg-slate-900">
+    <div class="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
+      <a href="/dashboard.html" class="text-sm text-sky-400 hover:underline">← Back to Dashboard</a>
+      <span class="font-bold text-sky-400">TrainAI<span class="text-white">.ug</span></span>
+    </div>
+  </nav>
+
+  <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <span id="categoryBadge" class="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-bold uppercase text-sky-300">AI TRAINING</span>
+      <span id="rewardBadge" class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">Potential reward: — UGX</span>
+    </div>
+
+    <section class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl sm:p-8">
+      <h1 id="surveyTitle" class="text-2xl font-bold">Loading survey…</h1>
+      <p id="surveyDescription" class="mt-2 text-sm leading-6 text-slate-400">Please wait while we load the task.</p>
+
+      <div class="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs leading-5 text-amber-200">
+        Your answers are submitted for review. A displayed reward is not credited until the submission is checked and approved. Do not submit personal or payment details in your answers.
+      </div>
+
+      <form id="surveyForm" class="mt-7 space-y-7">
+        <p id="loadingMessage" class="text-sm text-slate-400">Loading questions…</p>
+        <div id="questionList" class="space-y-7"></div>
+        <p id="formMessage" role="status" class="hidden rounded-lg p-3 text-sm"></p>
+        <button id="submitButton" type="submit" disabled class="w-full rounded-xl bg-sky-500 px-5 py-4 font-bold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50">
+          Submit answers for review
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const surveyId = params.get("id") || "onboarding";
+    const form = document.getElementById("surveyForm");
+    const questionList = document.getElementById("questionList");
+    const submitButton = document.getElementById("submitButton");
+    const formMessage = document.getElementById("formMessage");
+    let currentQuestions = [];
+
+    function showMessage(message, isError = true) {
+      formMessage.textContent = message;
+      formMessage.className = "rounded-lg p-3 text-sm " + (isError
+        ? "border border-rose-500/30 bg-rose-500/10 text-rose-300"
+        : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300");
+    }
+
+    function addChoice(container, questionIndex, choice, answerText) {
+      const label = document.createElement("label");
+      label.className = "flex cursor-pointer gap-3 rounded-xl border border-slate-700 bg-slate-950 p-4 transition hover:border-sky-400";
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "question_" + questionIndex;
+      radio.value = choice;
+      radio.required = true;
+      radio.className = "mt-1 accent-sky-400";
+      const text = document.createElement("span");
+      text.className = "text-sm leading-6 text-slate-300";
+      text.textContent = answerText;
+      label.append(radio, text);
+      container.append(label);
+    }
+
+    async function loadSurvey() {
+      try {
+        const response = await fetch("/api/user", { credentials: "same-origin" });
+        const data = await response.json();
+        if (response.status === 401) {
+          window.location.href = "/register.html";
+          return;
+        }
+        if (!response.ok || !data.success) throw new Error(data.error || "Could not load your account.");
+        const survey = (data.surveys || []).find(item => item.id === surveyId);
+        if (!survey) throw new Error("This survey is unavailable or has already been removed.");
+
+        document.getElementById("surveyTitle").textContent = survey.title;
+        document.getElementById("surveyDescription").textContent = survey.description || "Compare the two AI responses and choose the one that best answers the prompt.";
+        document.getElementById("categoryBadge").textContent = survey.category || "AI TRAINING";
+        document.getElementById("rewardBadge").textContent = "Potential reward: " + Number(survey.reward_ugx).toLocaleString() + " UGX";
+
+        if ((data.completedIds || []).includes(surveyId)) {
+          throw new Error("You have already submitted this survey.");
+        }
+
+        currentQuestions = JSON.parse(survey.questions_json || "[]");
+        if (!Array.isArray(currentQuestions) || currentQuestions.length === 0) {
+          throw new Error("This survey has no questions yet. Please check back later.");
+        }
+
+        questionList.replaceChildren();
+        currentQuestions.forEach((item, index) => {
+          const section = document.createElement("section");
+          section.className = "border-t border-slate-800 pt-6";
+          const heading = document.createElement("h2");
+          heading.className = "mb-4 font-semibold leading-6";
+          heading.textContent = (index + 1) + ". " + item.q;
+          const choices = document.createElement("div");
+          choices.className = "grid gap-3 md:grid-cols-2";
+          addChoice(choices, index, "A", item.a);
+          addChoice(choices, index, "B", item.b);
+          section.append(heading, choices);
+          questionList.append(section);
+        });
+        document.getElementById("loadingMessage").remove();
+        submitButton.disabled = false;
+      } catch (error) {
+        document.getElementById("loadingMessage").textContent = error.message;
+        submitButton.classList.add("hidden");
+      }
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const answers = [];
+      for (let index = 0; index < currentQuestions.length; index++) {
+        const selected = form.querySelector('input[name="question_' + index + '"]:checked');
+        if (!selected) {
+          showMessage("Please answer every question before submitting.");
+          return;
+        }
+        answers.push({ question: index, choice: selected.value });
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting for review…";
+      formMessage.classList.add("hidden");
+
+      try {
+        const response = await fetch("/api/submit", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ surveyId, answers })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error || "Submission failed.");
+        showMessage(result.message || "Your answers have been submitted for review.", false);
+        submitButton.textContent = "Submitted";
+        const back = document.createElement("a");
+        back.href = "/dashboard.html";
+        back.textContent = "Return to dashboard";
+        back.className = "mt-4 inline-block font-semibold text-sky-400 hover:underline";
+        form.append(back);
+      } catch (error) {
+        showMessage(error.message);
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit answers for review";
+      }
+    });
+
+    loadSurvey();
+  </script>
+</body>
+</html>
