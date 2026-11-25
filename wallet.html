@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#020617" />
+  <title>Wallet & Withdrawals — TrainAI Uganda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="border-b border-slate-800 bg-slate-900">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
+      <a href="/dashboard.html" class="text-sm text-sky-400 hover:underline">← Back to Dashboard</a>
+      <span class="font-bold">Trainer Wallet</span>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 grid md:grid-cols-2 gap-8">
+    <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h1 class="text-lg font-bold mb-1">Request Mobile Money Withdrawal</h1>
+      <p class="text-xs text-slate-400 mb-6">Minimum request: 10,000 UGX. A request is not a guaranteed or instant payout.</p>
+
+      <div class="bg-slate-950 p-4 rounded-xl mb-6 border border-slate-800">
+        <div class="text-xs text-slate-400">Available Balance</div>
+        <div id="walletBalance" class="text-2xl font-extrabold text-emerald-400 mt-1">Loading...</div>
+      </div>
+
+      <form id="withdrawForm" class="space-y-4">
+        <div>
+          <label for="network" class="block text-xs text-slate-400 mb-1">Mobile Money Network</label>
+          <select id="network" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm">
+            <option value="MTN">MTN Mobile Money</option>
+            <option value="AIRTEL">Airtel Money</option>
+          </select>
+        </div>
+        <div>
+          <label for="payoutPhone" class="block text-xs text-slate-400 mb-1">Phone Number</label>
+          <input type="tel" id="payoutPhone" required autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0770000000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label for="amount" class="block text-xs text-slate-400 mb-1">Amount (UGX)</label>
+          <input type="number" id="amount" min="10000" step="1" required placeholder="10000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm" />
+        </div>
+        <p id="formMessage" role="alert" aria-live="polite" class="text-sm hidden"></p>
+        <button id="withdrawButton" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-lg transition">
+          Submit Withdrawal Request
+        </button>
+      </form>
+      <p class="text-xs text-slate-500 leading-relaxed mt-5">Withdrawals will only be processed when the platform's payment system is configured, funded and operational. Never pay a fee to unlock a withdrawal.</p>
+    </section>
+
+    <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h2 class="text-lg font-bold mb-4">Earnings & Transaction History</h2>
+      <div id="ledgerList" class="space-y-3 text-sm" aria-live="polite">
+        <p class="text-slate-400">Loading transactions...</p>
+      </div>
+      <p id="historyError" role="alert" class="text-rose-400 text-xs mt-4 hidden"></p>
+    </section>
+  </main>
+
+  <script>
+    const userId = localStorage.getItem("trainai_user_id");
+    const balanceElement = document.getElementById("walletBalance");
+    const ledgerList = document.getElementById("ledgerList");
+    const form = document.getElementById("withdrawForm");
+    const submitButton = document.getElementById("withdrawButton");
+    const formMessage = document.getElementById("formMessage");
+    const historyError = document.getElementById("historyError");
+
+    if (!userId) {
+      window.location.href = "/register.html";
+    }
+
+    function formatUGX(value) {
+      const amount = Number(value);
+      return (Number.isFinite(amount) ? amount : 0).toLocaleString("en-UG") + " UGX";
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function showFormMessage(message, success) {
+      formMessage.textContent = message;
+      formMessage.className = "text-sm " + (success ? "text-emerald-400" : "text-rose-400");
+    }
+
+    async function loadWallet() {
+      try {
+        const res = await fetch("/api/user?userId=" + encodeURIComponent(userId), {
+          headers: { "Accept": "application/json" }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401 || res.status === 403 || !data.success) {
+          localStorage.removeItem("trainai_user_id");
+          window.location.href = "/register.html";
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || "Unable to load wallet.");
+
+        const user = data.user || {};
+        balanceElement.textContent = formatUGX(user.available_balance_ugx);
+        document.getElementById("payoutPhone").value = user.phone_number || "";
+
+        const ledger = Array.isArray(data.ledger) ? data.ledger : [];
+        if (!ledger.length) {
+          ledgerList.innerHTML = '<p class="text-slate-400">No transactions yet.</p>';
+          return;
+        }
+
+        ledgerList.innerHTML = ledger.map((item) => {
+          const type = item.transaction_type || item.type || "transaction";
+          const status = item.transaction_status || item.status || "pending";
+          const amount = item.amount_ugx;
+          return `
+            <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl flex justify-between items-center gap-3">
+              <div class="min-w-0">
+                <div class="font-semibold text-xs">${escapeHTML(String(type).replace(/_/g, " "))}</div>
+                <div class="text-xs text-slate-500">${escapeHTML(status)}</div>
+              </div>
+              <div class="font-bold text-emerald-400 whitespace-nowrap">${formatUGX(amount)}</div>
+            </div>
+          `;
+        }).join("");
+      } catch (error) {
+        balanceElement.textContent = "Unavailable";
+        ledgerList.innerHTML = "";
+        historyError.textContent = error.message || "Could not load transaction history.";
+        historyError.classList.remove("hidden");
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      formMessage.className = "text-sm hidden";
+
+      const amount = Number(document.getElementById("amount").value);
+      const phone = document.getElementById("payoutPhone").value.trim();
+      const network = document.getElementById("network").value;
+
+      if (!Number.isSafeInteger(amount) || amount < 10000) {
+        showFormMessage("The minimum withdrawal request is 10,000 UGX.", false);
+        return;
+      }
+      if (!phone) {
+        showFormMessage("Enter the mobile money phone number.", false);
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending request...";
+
+      try {
+        const res = await fetch("/api/withdraw", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, network, phone, amount })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Withdrawal request could not be submitted.");
+        }
+        showFormMessage(data.message || "Your withdrawal request was received.", true);
+        document.getElementById("amount").value = "";
+        await loadWallet();
+      } catch (error) {
+        showFormMessage(error.message || "Something went wrong. Please try again.", false);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Withdrawal Request";
+      }
+    });
+
+    if (userId) loadWallet();
+  </script>
+</body>
+</html>
