@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Admin Review — TrainAI Uganda</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <header class="border-b border-slate-800 bg-slate-900">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+      <a href="/" class="font-bold text-sky-400">TrainAI<span class="text-white">.ug</span></a>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Admin review</span>
+    </div>
+  </header>
+  <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <section class="mb-7 rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+      <h1 class="text-2xl font-bold">Submission review</h1>
+      <p class="mt-2 text-sm leading-6 text-slate-400">Enter the administrator key configured privately in Cloudflare. This page does not save the key in your browser.</p>
+      <form id="authForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
+        <input id="adminKey" type="password" autocomplete="off" required placeholder="Admin API key" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-sky-400" />
+        <button class="rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-sky-400" type="submit">Load submissions</button>
+      </form>
+      <p id="status" role="status" class="mt-3 text-sm text-slate-400">Admin access is required.</p>
+    </section>
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-lg font-bold">Pending submissions</h2>
+      <button id="refreshButton" type="button" class="hidden rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-sky-400">Refresh</button>
+    </div>
+    <section id="submissionList" class="space-y-5"></section>
+    <p class="mt-8 text-xs leading-5 text-slate-500">Approve only after checking the submitted answers. Approval credits the survey reward once. Rejection does not credit a reward. The welcome bonus is not unlocked by this action.</p>
+  </main>
+
+  <script>
+    let adminKey = "";
+    const list = document.getElementById("submissionList");
+    const statusLine = document.getElementById("status");
+    const refreshButton = document.getElementById("refreshButton");
+
+    function node(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function setStatus(message, error = false) {
+      statusLine.textContent = message;
+      statusLine.className = "mt-3 text-sm " + (error ? "text-rose-300" : "text-slate-400");
+    }
+
+    async function loadSubmissions() {
+      if (!adminKey) return;
+      setStatus("Loading pending submissions…");
+      refreshButton.disabled = true;
+      try {
+        const response = await fetch("/api/admin/review", {
+          headers: { "Authorization": "Bearer " + adminKey },
+          cache: "no-store"
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Could not load submissions.");
+        list.replaceChildren();
+        const submissions = data.submissions || [];
+        if (!submissions.length) {
+          list.append(node("div", "rounded-2xl border border-slate-800 bg-slate-900 p-6 text-sm text-slate-400", "There are no pending submissions."));
+        }
+        submissions.forEach(item => renderSubmission(item));
+        setStatus(submissions.length + " pending submission(s) loaded.");
+        refreshButton.classList.remove("hidden");
+      } catch (error) {
+        setStatus(error.message, true);
+        if (responseUnauthorized(error)) {
+          adminKey = "";
+          document.getElementById("adminKey").value = "";
+        }
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function responseUnauthorized(error) {
+      return /key is missing or incorrect/i.test(error.message);
+    }
+
+    function renderSubmission(item) {
+      const card = node("article", "rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6");
+      const top = node("div", "flex flex-wrap items-start justify-between gap-3");
+      const details = node("div", "min-w-0");
+      details.append(
+        node("h3", "text-lg font-bold", item.survey_title || "Survey"),
+        node("p", "mt-1 text-sm text-slate-400", (item.full_name || "User") + " · " + (item.email || "No email")),
+        node("p", "mt-1 text-xs text-slate-500", "Submitted: " + (item.submitted_at || "Unknown"))
+      );
+      top.append(details, node("span", "rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-300", Number(item.reward_ugx || 0).toLocaleString() + " UGX potential reward"));
+      card.append(top);
+
+      let questions = [];
+      let answers = [];
+      try { questions = JSON.parse(item.questions_json || "[]"); } catch {}
+      try { answers = JSON.parse(item.answers_json || "[]"); } catch {}
+      const answerBlock = node("div", "mt-5 space-y-4");
+      questions.forEach((question, index) => {
+        const answer = answers.find(entry => entry.question === index);
+        const chosen = answer?.choice;
+        const chosenText = chosen === "A" ? question.a : chosen === "B" ? question.b : "No valid answer recorded";
+        const section = node("div", "rounded-xl border border-slate-800 bg-slate-950 p-4");
+        section.append(
+          node("p", "text-sm font-semibold text-slate-200", (index + 1) + ". " + (question.q || "Question")),
+          node("p", "mt-2 text-sm leading-6 text-sky-200", "Selected " + (chosen || "—") + ": " + chosenText)
+        );
+        answerBlock.append(section);
+      });
+      card.append(answerBlock);
+
+      const actions = node("div", "mt-5 flex flex-wrap gap-3");
+      const approve = node("button", "rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50", "Approve and credit reward");
+      const reject = node("button", "rounded-xl border border-rose-500/40 px-5 py-3 text-sm font-semibold text-rose-300 hover:bg-rose-500/10 disabled:opacity-50", "Reject");
+      approve.type = reject.type = "button";
+      approve.addEventListener("click", () => review(item.id, "approve", approve, reject));
+      reject.addEventListener("click", () => review(item.id, "reject", approve, reject));
+      actions.append(approve, reject);
+      card.append(actions);
+      list.append(card);
+    }
+
+    async function review(responseId, decision, approveButton, rejectButton) {
+      const promptText = decision === "approve"
+        ? "Approve this submission and credit its survey reward?"
+        : "Reject this submission? No reward will be credited.";
+      if (!window.confirm(promptText)) return;
+      approveButton.disabled = rejectButton.disabled = true;
+      try {
+        const response = await fetch("/api/admin/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + adminKey },
+          body: JSON.stringify({ responseId, decision })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Review failed.");
+        setStatus(data.message || "Review completed.");
+        await loadSubmissions();
+      } catch (error) {
+        setStatus(error.message, true);
+        approveButton.disabled = rejectButton.disabled = false;
+      }
+    }
+
+    document.getElementById("authForm").addEventListener("submit", event => {
+      event.preventDefault();
+      adminKey = document.getElementById("adminKey").value.trim();
+      loadSubmissions();
+    });
+    refreshButton.addEventListener("click", loadSubmissions);
+  </script>
+</body>
+</html>
