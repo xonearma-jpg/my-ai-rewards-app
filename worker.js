@@ -832,6 +832,7 @@ const activationHandler=(()=>{
   const user=await auth(request,env);if(!user)return json({success:false,error:"Please sign in again."},401);
   if(request.method==="GET"){const p=await env.DB.prepare("SELECT id,status,created_at FROM activation_payments WHERE user_id=? AND status='pending' ORDER BY created_at DESC LIMIT 1").bind(user.id).first();return json({success:true,accountStatus:user.activation_status,feeUGX:20000,oneTime:true,paymentPending:!!p,payment:p||null,paymentsConfigured:!!(env.ACTIVATION_MTN_NUMBER||env.ACTIVATION_AIRTEL_NUMBER),recipients:{mtn:env.ACTIVATION_MTN_NUMBER||"",airtel:env.ACTIVATION_AIRTEL_NUMBER||""},accountName:env.ACTIVATION_ACCOUNT_NAME||"TrainAI Uganda"});}
   if(request.method!=="POST")return json({success:false,error:"Method not allowed."},405);
+  const origin=request.headers.get("Origin");if(origin&&origin!==new URL(request.url).origin)return json({success:false,error:"Invalid request origin."},403);
   if(user.activation_status==="active")return json({success:true,alreadyActive:true,message:"Your account is already active for life."});
   if(user.activation_status!=="pending")return json({success:false,error:"This account cannot be activated."},403);
   if(!env.ACTIVATION_MTN_NUMBER&&!env.ACTIVATION_AIRTEL_NUMBER)return json({success:false,error:"Activation payments are not open yet. Please check back later."},503);
