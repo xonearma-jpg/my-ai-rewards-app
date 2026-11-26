@@ -1,4 +1,8 @@
--- TrainAI Uganda one-time lifetime activation payments
+-- TrainAI Uganda one-time lifetime activation payments.
+-- Existing users default to active so their access is not changed.
+ALTER TABLE users ADD COLUMN activation_status TEXT NOT NULL DEFAULT 'active'
+  CHECK (activation_status IN ('pending','active'));
+
 CREATE TABLE IF NOT EXISTS activation_payments (
  id TEXT PRIMARY KEY,
  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
