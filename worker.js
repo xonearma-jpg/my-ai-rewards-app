@@ -66,8 +66,8 @@ async function onRequestPost({ request, env }) {
       env.DB.prepare(
         `INSERT INTO users
           (id, full_name, email, phone_number, password_hash, account_status,
-           locked_bonus_ugx, available_balance_ugx)
-         VALUES (?, ?, ?, ?, ?, 'pending_activation', 0, 0)`
+           locked_bonus_ugx, available_balance_ugx, activation_status)
+         VALUES (?, ?, ?, ?, ?, 'active', 0, 0, 'pending')`
       ).bind(userId, fullName, email, phone, passwordHash),
       env.DB.prepare(
         `INSERT INTO sessions (token_hash, user_id, expires_at)
@@ -152,7 +152,7 @@ async function onRequestGet({ request, env }) {
     }
 
     const user = await env.DB.prepare(
-      `SELECT id, full_name, phone_number, account_status, locked_bonus_ugx,
+      `SELECT id, full_name, phone_number, account_status, activation_status, locked_bonus_ugx,
               available_balance_ugx, surveys_completed
        FROM users
        WHERE id = ?`
@@ -255,10 +255,10 @@ async function onRequestPost({ request, env }) {
     }
 
     const user = await env.DB.prepare(
-      "SELECT id, account_status FROM users WHERE id = ?"
+      "SELECT id, account_status, activation_status FROM users WHERE id = ?"
     ).bind(session.user_id).first();
 
-    if (!user || user.account_status !== "active") {
+    if (!user || user.account_status !== "active" || user.activation_status !== "active") {
       return json({ success: false, error: "This account cannot submit surveys." }, 403);
     }
 
@@ -397,7 +397,7 @@ async function onRequestPost({ request, env }) {
     }
 
     const user = await env.DB.prepare(
-      "SELECT id, available_balance_ugx FROM users WHERE id = ? AND account_status = 'active'"
+      "SELECT id, available_balance_ugx FROM users WHERE id = ? AND account_status = 'active' AND activation_status = 'active'"
     ).bind(session.user_id).first();
 
     if (!user) {
@@ -827,13 +827,13 @@ return onRequest;})();
 const activationHandler=(()=>{
  const json=(b,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}});
  function cookie(req){for(const p of (req.headers.get("Cookie")||"").split(";")){const i=p.indexOf("=");if(i>=0&&p.slice(0,i).trim()==="trainai_session")return p.slice(i+1).trim();}return null;}
- async function auth(req,env){const t=cookie(req);if(!t)return null;const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));let b="";for(const x of new Uint8Array(d))b+=String.fromCharCode(x);const session=await env.DB.prepare("SELECT user_id,expires_at FROM sessions WHERE token_hash=?").bind(btoa(b)).first();if(!session||Date.parse(session.expires_at)<=Date.now())return null;return env.DB.prepare("SELECT id,account_status FROM users WHERE id=?").bind(session.user_id).first();}
+ async function auth(req,env){const t=cookie(req);if(!t)return null;const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));let b="";for(const x of new Uint8Array(d))b+=String.fromCharCode(x);const session=await env.DB.prepare("SELECT user_id,expires_at FROM sessions WHERE token_hash=?").bind(btoa(b)).first();if(!session||Date.parse(session.expires_at)<=Date.now())return null;return env.DB.prepare("SELECT id,account_status,activation_status FROM users WHERE id=?").bind(session.user_id).first();}
  async function onRequest({request,env}){if(!env.DB)return json({success:false,error:"Database is not configured."},500);try{
   const user=await auth(request,env);if(!user)return json({success:false,error:"Please sign in again."},401);
-  if(request.method==="GET"){const p=await env.DB.prepare("SELECT id,status,created_at FROM activation_payments WHERE user_id=? AND status='pending' ORDER BY created_at DESC LIMIT 1").bind(user.id).first();return json({success:true,accountStatus:user.account_status,feeUGX:20000,oneTime:true,paymentPending:!!p,payment:p||null,paymentsConfigured:!!(env.ACTIVATION_MTN_NUMBER||env.ACTIVATION_AIRTEL_NUMBER),recipients:{mtn:env.ACTIVATION_MTN_NUMBER||"",airtel:env.ACTIVATION_AIRTEL_NUMBER||""},accountName:env.ACTIVATION_ACCOUNT_NAME||"TrainAI Uganda"});}
+  if(request.method==="GET"){const p=await env.DB.prepare("SELECT id,status,created_at FROM activation_payments WHERE user_id=? AND status='pending' ORDER BY created_at DESC LIMIT 1").bind(user.id).first();return json({success:true,accountStatus:user.activation_status,feeUGX:20000,oneTime:true,paymentPending:!!p,payment:p||null,paymentsConfigured:!!(env.ACTIVATION_MTN_NUMBER||env.ACTIVATION_AIRTEL_NUMBER),recipients:{mtn:env.ACTIVATION_MTN_NUMBER||"",airtel:env.ACTIVATION_AIRTEL_NUMBER||""},accountName:env.ACTIVATION_ACCOUNT_NAME||"TrainAI Uganda"});}
   if(request.method!=="POST")return json({success:false,error:"Method not allowed."},405);
-  if(user.account_status==="active")return json({success:true,alreadyActive:true,message:"Your account is already active for life."});
-  if(user.account_status!=="pending_activation")return json({success:false,error:"This account cannot be activated."},403);
+  if(user.activation_status==="active")return json({success:true,alreadyActive:true,message:"Your account is already active for life."});
+  if(user.activation_status!=="pending")return json({success:false,error:"This account cannot be activated."},403);
   if(!env.ACTIVATION_MTN_NUMBER&&!env.ACTIVATION_AIRTEL_NUMBER)return json({success:false,error:"Activation payments are not open yet. Please check back later."},503);
   const body=await request.json(),network=String(body.network||"").toUpperCase(),phone=String(body.payerPhone||"").replace(/[\s()-]/g,""),ref=String(body.transactionReference||"").trim().toUpperCase();
   if(!["MTN","AIRTEL"].includes(network))return json({success:false,error:"Choose MTN or Airtel Money."},400);
@@ -856,7 +856,7 @@ const adminActivationHandler=(()=>{
    const p=await env.DB.prepare("SELECT id,user_id,status FROM activation_payments WHERE id=?").bind(id).first();if(!p)return json({success:false,error:"Payment record not found."},404);if(p.status!=="pending")return json({success:false,error:"This payment has already been reviewed."},409);
    const marker=new Date().toISOString()+"-"+crypto.randomUUID();
    if(decision==="reject"){const r=await env.DB.prepare("UPDATE activation_payments SET status='rejected',reviewed_at=? WHERE id=? AND status='pending'").bind(marker,id).run();if(r.meta?.changes!==1)return json({success:false,error:"Another admin already reviewed this payment."},409);return json({success:true,message:"Payment rejected. Account remains pending activation."});}
-   const r=await env.DB.batch([env.DB.prepare("UPDATE activation_payments SET status='approved',reviewed_at=? WHERE id=? AND status='pending'").bind(marker,id),env.DB.prepare("UPDATE users SET account_status='active',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND account_status='pending_activation' AND EXISTS(SELECT 1 FROM activation_payments WHERE id=? AND status='approved' AND reviewed_at=?)").bind(p.user_id,id,marker)]);
+   const r=await env.DB.batch([env.DB.prepare("UPDATE activation_payments SET status='approved',reviewed_at=? WHERE id=? AND status='pending'").bind(marker,id),env.DB.prepare("UPDATE users SET activation_status='active',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND activation_status='pending' AND EXISTS(SELECT 1 FROM activation_payments WHERE id=? AND status='approved' AND reviewed_at=?)").bind(p.user_id,id,marker)]);
    if(r?.[0]?.meta?.changes!==1)return json({success:false,error:"Another admin already reviewed this payment."},409);if(r?.[1]?.meta?.changes!==1)return json({success:false,error:"Payment approved but account activation needs investigation. Do not retry."},500);
    return json({success:true,message:"Payment verified. Account activated for life."});
   }catch{return json({success:false,error:"Could not process activation payment."},500);}
