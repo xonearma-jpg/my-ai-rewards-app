@@ -1,0 +1,99 @@
+{
+  "id": "UG-SOCIAL-001",
+  "title": "Uganda Community & Social Life — Pilot Set 01",
+  "country": "Uganda",
+  "country_code": "UG",
+  "format": "single_select_multiple_choice",
+  "audience": "Ugandan adults",
+  "instructions": "Choose one option for each question. These are opinion and experience questions; there are no right or wrong answers. Do not enter names, phone numbers, exact addresses or other identifying information.",
+  "questions": [
+    {
+      "id": "UGSOC001",
+      "topic": "Community life",
+      "question": "Which activity would most improve connection among people in your neighbourhood?",
+      "options": {
+        "A": "Community clean-up days",
+        "B": "Sports and recreation activities",
+        "C": "Local meetings and discussion groups",
+        "D": "Skills-sharing or learning sessions"
+      }
+    },
+    {
+      "id": "UGSOC002",
+      "topic": "Transport",
+      "question": "What most influences your choice of transport for a typical short trip?",
+      "options": {
+        "A": "Total cost",
+        "B": "Travel time",
+        "C": "Safety and reliability",
+        "D": "Convenience and availability"
+      }
+    },
+    {
+      "id": "UGSOC003",
+      "topic": "Mobile money",
+      "question": "What would make you feel more confident when using mobile money?",
+      "options": {
+        "A": "Clear transaction notifications",
+        "B": "Easier ways to report mistakes or fraud",
+        "C": "Lower transaction charges",
+        "D": "More guidance on protecting account details"
+      }
+    },
+    {
+      "id": "UGSOC004",
+      "topic": "Food and culture",
+      "question": "When choosing a place to eat with friends or family, what matters most?",
+      "options": {
+        "A": "Price and value",
+        "B": "Taste and food quality",
+        "C": "Cleanliness and hygiene",
+        "D": "Location and atmosphere"
+      }
+    },
+    {
+      "id": "UGSOC005",
+      "topic": "Family and social life",
+      "question": "What is the most common way you prefer to keep in touch with relatives who live far away?",
+      "options": {
+        "A": "Phone calls",
+        "B": "WhatsApp or other messaging",
+        "C": "Video calls",
+        "D": "In-person visits when possible"
+      }
+    },
+    {
+      "id": "UGSOC006",
+      "topic": "Shopping",
+      "question": "What most affects where you buy everyday household items?",
+      "options": {
+        "A": "Affordable prices",
+        "B": "Trust in the seller",
+        "C": "Product quality",
+        "D": "Distance or delivery convenience"
+      }
+    },
+    {
+      "id": "UGSOC007",
+      "topic": "Public services",
+      "question": "Which improvement would make the biggest difference to your local area?",
+      "options": {
+        "A": "Better waste collection",
+        "B": "Improved roads and drainage",
+        "C": "Reliable water access",
+        "D": "More public lighting"
+      }
+    },
+    {
+      "id": "UGSOC008",
+      "topic": "Digital habits",
+      "question": "What is your main reason for using the internet on a typical day?",
+      "options": {
+        "A": "Communication and social media",
+        "B": "Learning and information",
+        "C": "Work or business",
+        "D": "Entertainment"
+      }
+    }
+  ]
+}
