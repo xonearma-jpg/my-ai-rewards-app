@@ -167,7 +167,7 @@ function openWithdraw(){
  const publicRef=id=>"#WDL-"+String(id||"").replace(/-/g,"").toUpperCase();
  let onKey=null;const close=()=>{root.innerHTML="";document.body.style.overflow="";if(onKey)document.removeEventListener("keydown",onKey);if(lastFocus&&lastFocus.focus)lastFocus.focus()};
  const shell=(content)=>'<div class="checkout-backdrop" id="checkoutBackdrop"><section class="checkout-sheet" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle" aria-describedby="checkoutDescription" tabindex="-1"><div class="checkout-top"><div><div class="checkout-kicker">TrainAI · Mobile Money</div><h2 class="checkout-title" id="checkoutTitle">'+(step===1?"Withdraw funds":step===2?"Review your request":"Request received")+'</h2><p class="muted small" id="checkoutDescription">'+(step===1?"Choose an amount and confirm your saved payout destination.":step===2?"Check every detail before submitting.":"Your withdrawal request has been recorded.")+'</p></div><button type="button" class="btn btn-quiet" id="checkoutClose" aria-label="Close withdrawal checkout">×</button></div><div class="checkout-steps" aria-label="Checkout progress"><span class="'+(step>=1?"active":"")+'"></span><span class="'+(step>=2?"active":"")+'"></span><span class="'+(step>=3?"active":"")+'"></span></div>'+content+'</section></div>';
- const bindClose=()=>{document.getElementById("checkoutClose").onclick=close;document.getElementById("checkoutBackdrop").onclick=e=>{if(e.target.id==="checkoutBackdrop"&&!submitting)close()};};
+ const bindClose=()=>{const closeBtn=document.getElementById("checkoutClose");closeBtn.onclick=close;document.getElementById("checkoutBackdrop").onclick=e=>{if(e.target.id==="checkoutBackdrop"&&!submitting)close()};};
  const renderAmount=()=>{
   step=1;
   const valid=Number.isSafeInteger(amount)&&amount>=MIN_PAYOUT&&amount<=bal;
@@ -198,9 +198,9 @@ function openWithdraw(){
  };
  const submit=async()=>{
   if(submitting)return;
-  submitting=true;const btn=document.getElementById("checkoutConfirm"),err=document.getElementById("checkoutError");btn.disabled=true;btn.innerHTML='<span class="checkout-spin" aria-hidden="true"></span>Submitting…';err.textContent="";
+  submitting=true;const btn=document.getElementById("checkoutConfirm"),err=document.getElementById("checkoutError");document.getElementById("checkoutClose").disabled=true;btn.disabled=true;btn.innerHTML='<span class="checkout-spin" aria-hidden="true"></span>Submitting…';err.textContent="";
   try{const d=await post("/api/withdraw",{amount,network,phone});await renderReceipt(d)}
-  catch(e){submitting=false;btn.disabled=false;btn.textContent="Confirm & Request Payout";err.textContent=e.message||"We could not submit your request. Please try again."}
+  catch(e){submitting=false;document.getElementById("checkoutClose").disabled=false;btn.disabled=false;btn.textContent="Confirm & Request Payout";err.textContent=e.message||"We could not submit your request. Please try again."}
  };
  root.innerHTML=shell("");
  document.body.style.overflow="hidden";
