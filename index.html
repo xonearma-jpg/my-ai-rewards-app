@@ -3,62 +3,240 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Help evaluate AI answers, check Luganda translations, and take part in AI training surveys with TrainAI Uganda." />
-  <meta name="theme-color" content="#020617" />
-  <title>TrainAI Uganda — Teach AI & Earn UGX</title>
+  <meta name="description" content="Contribute to AI training by reviewing answers, checking translations and completing feedback tasks with TrainAI.ug." />
+  <meta name="theme-color" content="#0F172A" />
+  <title>TrainAI.ug — Help Improve AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          canvas: '#0F172A', panel: '#1E293B', line: '#334155',
+          muted: '#94A3B8', brand: '#38BDF8', earned: '#10B981',
+          pending: '#F59E0B'
+        },
+        boxShadow: { glow: '0 0 40px rgba(56,189,248,.12)' }
+      }}
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background: #0F172A; }
+    summary::-webkit-details-marker { display: none; }
+    .faq-chevron { transition: transform .2s ease; }
+    details[open] .faq-chevron { transform: rotate(180deg); }
+    a:focus-visible, summary:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4px; }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased">
-  <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="/" class="text-xl font-bold tracking-tight text-sky-400">TrainAI<span class="text-slate-100">.ug</span></a>
-      <div class="flex items-center gap-4">
-        <a href="/dashboard.html" class="text-sm text-slate-300 hover:text-white">Dashboard</a>
-        <a href="/register.html" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition">Get Started</a>
+<body class="bg-canvas text-slate-100 antialiased selection:bg-sky-400/30">
+  <header class="sticky top-0 z-50 border-b border-line/80 bg-canvas/90 backdrop-blur-xl">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8" aria-label="Main navigation">
+      <a href="/" class="text-2xl font-black tracking-tight text-brand">TrainAI<span class="text-white">.ug</span></a>
+      <div class="hidden items-center gap-8 md:flex">
+        <a href="#how-it-works" class="text-sm text-muted transition hover:text-white">How it works</a>
+        <a href="#tasks" class="text-sm text-muted transition hover:text-white">Tasks</a>
+        <a href="#faq" class="text-sm text-muted transition hover:text-white">FAQs</a>
+        <a href="/dashboard.html" class="text-sm text-muted transition hover:text-white">Dashboard</a>
+        <a href="/register.html" class="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-sky-300">Create account</a>
       </div>
-    </div>
-  </nav>
+      <div class="flex items-center gap-2 md:hidden">
+        <a href="/dashboard.html" class="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-slate-200">Dashboard</a>
+        <a href="/register.html" class="rounded-lg bg-brand px-3 py-2 text-xs font-bold text-slate-950">Join free</a>
+      </div>
+    </nav>
+  </header>
 
-  <main class="max-w-4xl mx-auto px-6 py-20 text-center">
-    <span class="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-1 rounded-full mb-6">
-      5,000 UGX WELCOME BONUS — LOCKED UNTIL ELIGIBILITY IS MET
-    </span>
-    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-      Train Smarter AI Models. <br><span class="text-sky-400">Earn Rewards in UGX.</span>
-    </h1>
-    <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-10">
-      Help improve artificial intelligence by rating AI responses, checking local-language translations, and completing feedback surveys from your phone or computer.
-    </p>
-    <div class="flex flex-col sm:flex-row justify-center gap-4">
-      <a href="/register.html" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-8 py-4 rounded-xl text-lg shadow-lg shadow-sky-500/20 transition">
-        Create a Free Account
-      </a>
-      <a href="#how-it-works" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-8 py-4 rounded-xl text-lg transition">
-        How It Works
-      </a>
-    </div>
+  <main>
+    <section class="relative isolate overflow-hidden">
+      <div class="pointer-events-none absolute -top-32 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-sky-500/10 blur-3xl"></div>
+      <div class="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.15fr_.85fr] lg:py-28">
+        <div>
+          <div class="mb-7 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-xs font-bold tracking-wide text-amber-300">
+            <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+            5,000 UGX STARTER BONUS RESERVED
+          </div>
+          <h1 class="max-w-3xl text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+            Your feedback helps make AI <span class="text-brand">better for everyone.</span>
+          </h1>
+          <p class="mt-6 max-w-2xl text-base leading-8 text-muted sm:text-lg">
+            Review AI answers, check local-language translations and complete short training tasks. Contribute from your phone or computer and track approved rewards in UGX.
+          </p>
+          <p class="mt-4 text-sm font-semibold text-amber-300">Your 5,000 UGX starter bonus is reserved. Complete 3 eligible tasks and wait for approval to meet the stated unlock requirement.</p>
+          <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+            <a href="/register.html" class="inline-flex items-center justify-center rounded-xl bg-brand px-7 py-4 font-extrabold text-slate-950 shadow-glow transition hover:-translate-y-0.5 hover:bg-sky-300">Create a free account <span class="ml-2" aria-hidden="true">→</span></a>
+            <a href="#how-it-works" class="inline-flex items-center justify-center rounded-xl border border-line bg-panel px-7 py-4 font-bold text-slate-100 transition hover:border-slate-500 hover:bg-slate-700">See how it works</a>
+          </div>
+          <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-xs text-muted">
+            <span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Free registration</span>
+            <span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Tasks reviewed before rewards</span>
+            <span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> UGX reward tracking</span>
+          </div>
+        </div>
 
-    <div id="how-it-works" class="grid md:grid-cols-3 gap-6 mt-24 text-left">
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-sky-400 font-bold text-sm mb-2">STEP 01</div>
-        <h2 class="text-lg font-bold mb-2">Create a Free Account</h2>
-        <p class="text-slate-400 text-sm">Register with your details. A 5,000 UGX promotional bonus is recorded as locked and is not immediately withdrawable.</p>
+        <div class="mx-auto w-full max-w-md">
+          <div class="rounded-3xl border border-line bg-panel p-5 shadow-2xl shadow-black/20 sm:p-7">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[.18em] text-muted">Starter bonus tracker</p>
+                <p class="mt-2 text-3xl font-black tabular-nums">5,000 <span class="text-base font-bold text-muted">UGX</span></p>
+              </div>
+              <span class="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-bold text-amber-300">Reserved</span>
+            </div>
+            <div class="mt-7">
+              <div class="mb-3 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-200">Eligibility progress</span>
+                <span class="text-muted">3 approved tasks required</span>
+              </div>
+              <div class="h-2.5 overflow-hidden rounded-full bg-slate-700">
+                <div class="h-full w-0 rounded-full bg-brand"></div>
+              </div>
+              <p class="mt-3 text-xs leading-5 text-muted">Your personal progress appears in your dashboard after you register. Only approved tasks count; submitting a task does not mean it has been approved.</p>
+            </div>
+            <div class="mt-7 grid grid-cols-2 gap-3">
+              <div class="rounded-2xl border border-line bg-slate-900/60 p-4">
+                <p class="text-xs text-muted">Task reviews</p>
+                <p class="mt-2 text-sm font-bold text-emerald-400">Quality checked</p>
+              </div>
+              <div class="rounded-2xl border border-line bg-slate-900/60 p-4">
+                <p class="text-xs text-muted">Reward status</p>
+                <p class="mt-2 text-sm font-bold text-amber-300">Approval required</p>
+              </div>
+            </div>
+            <div class="mt-5 rounded-2xl border border-sky-400/20 bg-sky-400/5 p-4 text-xs leading-5 text-slate-300">
+              <span class="font-bold text-brand">A clear process:</span> complete a task, submit your answer, wait for review, then check your account for any approved reward.
+            </div>
+          </div>
+          <p class="mt-4 text-center text-xs text-muted">No earnings or task availability are guaranteed.</p>
+        </div>
       </div>
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-sky-400 font-bold text-sm mb-2">STEP 02</div>
-        <h2 class="text-lg font-bold mb-2">Complete AI Surveys</h2>
-        <p class="text-slate-400 text-sm">Compare AI answers, assess factual accuracy, and review translations. Advertised task rewards are subject to valid submission and review.</p>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-sky-400 font-bold text-sm mb-2">STEP 03</div>
-        <h2 class="text-lg font-bold mb-2">Request a Withdrawal</h2>
-        <p class="text-slate-400 text-sm">Eligible available balances may be requested through MTN MoMo or Airtel Money once payment processing is configured and funded.</p>
-      </div>
-    </div>
+    </section>
 
-    <p class="text-slate-500 text-xs leading-relaxed max-w-2xl mx-auto mt-10">
-      Rewards are promotional or task-based and are not guaranteed income. The welcome bonus is locked until the published eligibility conditions are met. Survey submissions may be reviewed before rewards become available. Withdrawals are not available until the payment system is operational and funds are available.
-    </p>
+    <section id="how-it-works" class="border-y border-line/70 bg-slate-900/40">
+      <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-xs font-bold uppercase tracking-[.2em] text-brand">Simple steps</p>
+          <h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">How TrainAI works</h2>
+          <p class="mt-4 leading-7 text-muted">Start with a free account. Your work is checked before eligible rewards are added to your available balance.</p>
+        </div>
+        <div class="mt-12 grid gap-5 md:grid-cols-3">
+          <article class="rounded-2xl border border-line bg-panel p-6">
+            <span class="text-sm font-black tracking-widest text-brand">01 / JOIN</span>
+            <h3 class="mt-4 text-xl font-bold">Create your account</h3>
+            <p class="mt-3 text-sm leading-7 text-muted">Register using your details. Your starter bonus is recorded as locked and is not cash you can withdraw immediately.</p>
+          </article>
+          <article class="rounded-2xl border border-line bg-panel p-6">
+            <span class="text-sm font-black tracking-widest text-brand">02 / CONTRIBUTE</span>
+            <h3 class="mt-4 text-xl font-bold">Complete AI tasks</h3>
+            <p class="mt-3 text-sm leading-7 text-muted">Compare AI responses, check translation quality and answer feedback questions carefully. Submit work for review.</p>
+          </article>
+          <article class="rounded-2xl border border-line bg-panel p-6">
+            <span class="text-sm font-black tracking-widest text-brand">03 / TRACK</span>
+            <h3 class="mt-4 text-xl font-bold">Track approved rewards</h3>
+            <p class="mt-3 text-sm leading-7 text-muted">See task decisions and your wallet records in your account. A submitted task is not a confirmed reward until it is approved.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tasks" class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
+      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.2em] text-brand">What contributors do</p>
+          <h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Useful work. Clear instructions.</h2>
+        </div>
+        <p class="max-w-md text-sm leading-6 text-muted">Available tasks can change. Your dashboard is the place to check what is currently open to you.</p>
+      </div>
+      <div class="mt-9 grid gap-5 md:grid-cols-3">
+        <article class="rounded-2xl border border-line bg-panel p-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-400/10 text-xl text-brand" aria-hidden="true">⇄</div>
+          <h3 class="mt-5 text-lg font-bold">Compare AI answers</h3>
+          <p class="mt-2 text-sm leading-7 text-muted">Read two responses and choose which is more helpful, clear and accurate.</p>
+        </article>
+        <article class="rounded-2xl border border-line bg-panel p-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-xl text-emerald-400" aria-hidden="true">文</div>
+          <h3 class="mt-5 text-lg font-bold">Review translations</h3>
+          <p class="mt-2 text-sm leading-7 text-muted">Help assess whether local-language translations preserve the original meaning.</p>
+        </article>
+        <article class="rounded-2xl border border-line bg-panel p-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400/10 text-xl text-amber-300" aria-hidden="true">✓</div>
+          <h3 class="mt-5 text-lg font-bold">Give useful feedback</h3>
+          <p class="mt-2 text-sm leading-7 text-muted">Answer task questions carefully and follow the instructions provided with each task.</p>
+        </article>
+      </div>
+      <div class="mt-8 flex justify-center">
+        <a href="/register.html" class="rounded-xl bg-brand px-7 py-3.5 font-extrabold text-slate-950 transition hover:bg-sky-300">Get started</a>
+      </div>
+    </section>
+
+    <section class="border-y border-line/70 bg-slate-900/40">
+      <div class="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-8 md:grid-cols-2 md:items-center">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.2em] text-brand">Account transparency</p>
+          <h2 class="mt-3 text-2xl font-black sm:text-3xl">Know what each balance means.</h2>
+          <p class="mt-4 text-sm leading-7 text-muted">TrainAI separates locked promotional amounts from available rewards. Pending submissions are reviewed before any task reward is credited.</p>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-5">
+            <p class="text-xs font-semibold text-amber-300">LOCKED</p>
+            <p class="mt-2 text-lg font-bold">Starter bonus</p>
+            <p class="mt-2 text-xs leading-5 text-muted">Reserved promotional amount. Not currently withdrawable.</p>
+          </div>
+          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-5">
+            <p class="text-xs font-semibold text-emerald-400">AVAILABLE</p>
+            <p class="mt-2 text-lg font-bold">Approved rewards</p>
+            <p class="mt-2 text-xs leading-5 text-muted">Task rewards credited after the review process approves valid work.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="mx-auto max-w-4xl px-5 py-16 sm:px-8 lg:py-20">
+      <div class="text-center">
+        <p class="text-xs font-bold uppercase tracking-[.2em] text-brand">FAQs</p>
+        <h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Questions, answered clearly.</h2>
+      </div>
+      <div class="mt-9 space-y-3">
+        <details class="group rounded-2xl border border-line bg-panel p-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">Is registration free?<span class="faq-chevron text-brand" aria-hidden="true">⌄</span></summary>
+          <p class="mt-4 text-sm leading-7 text-muted">Yes. Creating a TrainAI account is free. Be careful of anyone asking you to pay an activation or registration fee. No such fee is required by this landing page.</p>
+        </details>
+        <details class="group rounded-2xl border border-line bg-panel p-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">Can I withdraw the 5,000 UGX starter bonus immediately?<span class="faq-chevron text-brand" aria-hidden="true">⌄</span></summary>
+          <p class="mt-4 text-sm leading-7 text-muted">No. It is a locked promotional amount. The stated eligibility requirement is three eligible tasks approved through review. The bonus remains locked until your account confirms that the eligibility conditions have been met.</p>
+        </details>
+        <details class="group rounded-2xl border border-line bg-panel p-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">When are task rewards added to my balance?<span class="faq-chevron text-brand" aria-hidden="true">⌄</span></summary>
+          <p class="mt-4 text-sm leading-7 text-muted">After you submit a task, it may be reviewed. Only approved submissions qualify for the reward configured for that task. Submitting work does not guarantee approval or payment.</p>
+        </details>
+        <details class="group rounded-2xl border border-line bg-panel p-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">Can I receive money through MTN MoMo or Airtel Money now?<span class="faq-chevron text-brand" aria-hidden="true">⌄</span></summary>
+          <p class="mt-4 text-sm leading-7 text-muted">Mobile money payout processing is not active yet. MTN MoMo and Airtel Money are intended payout options, but no withdrawal should be treated as available until payment processing is configured, tested and funded. Your account balance is not a promise of an immediate payout.</p>
+        </details>
+        <details class="group rounded-2xl border border-line bg-panel p-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">Are tasks and earnings guaranteed every day?<span class="faq-chevron text-brand" aria-hidden="true">⌄</span></summary>
+          <p class="mt-4 text-sm leading-7 text-muted">No. Task availability, eligibility and rewards may vary. TrainAI does not guarantee daily tasks, a fixed income or a particular amount of earnings.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="px-5 pb-16 sm:px-8">
+      <div class="mx-auto max-w-5xl rounded-3xl border border-sky-400/20 bg-gradient-to-br from-sky-400/10 to-panel p-8 text-center sm:p-12">
+        <h2 class="text-3xl font-black tracking-tight sm:text-4xl">Ready to contribute?</h2>
+        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted">Create your free account and check your dashboard for available tasks and account updates.</p>
+        <a href="/register.html" class="mt-7 inline-flex rounded-xl bg-brand px-8 py-4 font-extrabold text-slate-950 transition hover:bg-sky-300">Create your free account <span class="ml-2" aria-hidden="true">→</span></a>
+      </div>
+    </section>
   </main>
+
+  <footer class="border-t border-line">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-xs text-muted sm:px-8 md:flex-row md:items-center md:justify-between">
+      <a href="/" class="text-lg font-black text-brand">TrainAI<span class="text-white">.ug</span></a>
+      <p class="max-w-2xl leading-6">Rewards are promotional or task-based and are not guaranteed income. Task submissions may be reviewed. Payout processing is not currently active; no withdrawal or payment is guaranteed.</p>
+      <div class="flex gap-5">
+        <a href="/register.html" class="transition hover:text-white">Register</a>
+        <a href="/dashboard.html" class="transition hover:text-white">Dashboard</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
