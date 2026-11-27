@@ -59,6 +59,63 @@ CREATE TABLE IF NOT EXISTS wallet_journal_entries (
 CREATE INDEX IF NOT EXISTS idx_wallet_journal_user_created
 ON wallet_journal_entries(user_id, created_at DESC);
 
+-- Backfill the existing wallet history so the journal covers old and new transactions.
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id,
+  CASE transaction_type
+    WHEN 'welcome_bonus_locked' THEN 'promotion_expense'
+    WHEN 'bonus_unlocked' THEN 'user_locked_liability'
+    WHEN 'survey_reward' THEN 'task_reward_expense'
+    WHEN 'withdrawal' THEN 'user_available_liability'
+  END,
+  'debit', amount_ugx, reference
+FROM wallet_transactions
+WHERE transaction_type IN ('welcome_bonus_locked','bonus_unlocked','survey_reward','withdrawal');
+
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id,
+  CASE transaction_type
+    WHEN 'welcome_bonus_locked' THEN 'user_locked_liability'
+    WHEN 'bonus_unlocked' THEN 'user_available_liability'
+    WHEN 'survey_reward' THEN 'user_available_liability'
+    WHEN 'withdrawal' THEN 'withdrawal_payable'
+  END,
+  'credit', amount_ugx, reference
+FROM wallet_transactions
+WHERE transaction_type IN ('welcome_bonus_locked','bonus_unlocked','survey_reward','withdrawal');
+
+-- Existing paid withdrawals have already settled their payable; reversed ones
+-- have already returned the available balance.
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id, 'withdrawal_payable',
+       'debit', amount_ugx, reference || '-SETTLED'
+FROM wallet_transactions
+WHERE transaction_type='withdrawal' AND transaction_status='completed';
+
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id, 'mobile_money_clearing',
+       'credit', amount_ugx, reference || '-SETTLED'
+FROM wallet_transactions
+WHERE transaction_type='withdrawal' AND transaction_status='completed';
+
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id, 'withdrawal_payable',
+       'debit', amount_ugx, reference || '-REV'
+FROM wallet_transactions
+WHERE transaction_type='withdrawal' AND transaction_status='reversed';
+
+INSERT OR IGNORE INTO wallet_journal_entries
+  (id, transaction_id, user_id, account_code, entry_side, amount_ugx, reference)
+SELECT lower(hex(randomblob(16))), id, user_id, 'user_available_liability',
+       'credit', amount_ugx, reference || '-REV'
+FROM wallet_transactions
+WHERE transaction_type='withdrawal' AND transaction_status='reversed';
+
 CREATE TRIGGER IF NOT EXISTS trg_wallet_transaction_journal_insert
 AFTER INSERT ON wallet_transactions
 WHEN NEW.transaction_type IN ('welcome_bonus_locked','bonus_unlocked','survey_reward','withdrawal')
