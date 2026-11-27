@@ -412,6 +412,7 @@ function normalizeUgandanPhone(value) {
 }
 
 async function onRequestPost({ request, env }) {
+  if (request.method !== "POST") return json({ success: false, error: "Method not allowed." }, 405);
   try {
     if (!env.DB) {
       return json({ success: false, error: "Database is not configured." }, 500);
@@ -464,10 +465,14 @@ async function onRequestPost({ request, env }) {
     if (!phone) {
       return json({ success: false, error: "Enter a valid Ugandan mobile number." }, 400);
     }
-    if (!user.payout_locked || !user.payout_number || !user.payout_network) {
+    if (!user.payout_locked || !user.payout_name || !user.payout_number || !user.payout_network) {
       return json({ success: false, error: "Verify and lock your Mobile Money payout account in Settings first." }, 409);
     }
-    if (network !== user.payout_network || phone !== user.payout_number) {
+    const prefix = phone.slice(4, 6);
+    const detectedNetwork = ["77", "78", "76", "39"].includes(prefix)
+      ? "MTN"
+      : ["70", "74", "75"].includes(prefix) ? "AIRTEL" : null;
+    if (!detectedNetwork || detectedNetwork !== network || network !== user.payout_network || phone !== user.payout_number) {
       return json({ success: false, error: "Withdrawal destination must match your locked payout account." }, 400);
     }
     if (!Number.isSafeInteger(amount) || amount < 25000) {
@@ -529,10 +534,19 @@ async function onRequestPost({ request, env }) {
       return json({ success: false, error: "Insufficient balance or withdrawal could not be created. Refresh your wallet and try again." }, 409);
     }
 
+    const savedRequest = await env.DB.prepare(
+      "SELECT created_at FROM withdrawal_requests WHERE id = ? AND user_id = ?"
+    ).bind(withdrawalId, user.id).first();
     return json({
       success: true,
       status: "pending",
       withdrawalId,
+      reference: "WDL-" + withdrawalId.toUpperCase(),
+      createdAt: savedRequest?.created_at || new Date().toISOString(),
+      amountUGX: amount,
+      payoutName: user.payout_name,
+      network,
+      phone,
       platformFeeUGX: 0,
       message: "Your withdrawal request has been received and is awaiting review. This is not a payment confirmation.",
     }, 201);
