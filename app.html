@@ -199,7 +199,7 @@ function openWithdraw(){
  const submit=async()=>{
   if(submitting)return;
   submitting=true;const btn=document.getElementById("checkoutConfirm"),err=document.getElementById("checkoutError");document.getElementById("checkoutClose").disabled=true;btn.disabled=true;btn.innerHTML='<span class="checkout-spin" aria-hidden="true"></span>Submitting…';err.textContent="";
-  try{const d=await post("/api/withdraw",{amount,network,phone});await renderReceipt(d)}
+  try{const d=await post("/api/withdraw",{amount,network,phone});submitting=false;await renderReceipt(d)}
   catch(e){submitting=false;document.getElementById("checkoutClose").disabled=false;btn.disabled=false;btn.textContent="Confirm & Request Payout";err.textContent=e.message||"We could not submit your request. Please try again."}
  };
  root.innerHTML=shell("");
