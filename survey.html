@@ -3,41 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#020617" />
-  <title>AI Training Survey — TrainAI Uganda</title>
+  <meta name="theme-color" content="#0E0E10" />
+  <title>AI Task Workspace — TrainAI.ug</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: dark; }
+    body { background:#0E0E10; color:#E3E3E3; }
+    .surface { background:#1E1F20; border:1px solid #333537; }
+    .muted-surface { background:#131314; border:1px solid #333537; }
+    .choice-card { background:#1B1C1D; border:1px solid #3C4043; transition:border-color .18s,background .18s,transform .18s; }
+    .choice-card:hover { border-color:#A8C7FA; background:#22252A; }
+    .choice-card:has(input:checked) { border-color:#A8C7FA; background:rgba(168,199,250,.10); box-shadow:0 0 0 1px rgba(168,199,250,.18) inset; }
+    .gradient-text { background:linear-gradient(135deg,#A8C7FA,#C58AF9,#F28B82);-webkit-background-clip:text;background-clip:text;color:transparent; }
+    .gradient-pill { background:linear-gradient(110deg,rgba(66,133,244,.18),rgba(155,114,203,.18),rgba(217,101,112,.18)); border:1px solid rgba(168,199,250,.25); }
+    button:disabled { cursor:not-allowed; opacity:.5; }
+  </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-  <nav class="border-b border-slate-800 bg-slate-900">
-    <div class="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
-      <a href="/dashboard.html" class="text-sm text-sky-400 hover:underline">← Back to Dashboard</a>
-      <span class="font-bold text-sky-400">TrainAI<span class="text-white">.ug</span></span>
-    </div>
-  </nav>
-
-  <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <span id="categoryBadge" class="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-bold uppercase text-sky-300">AI TRAINING</span>
-      <span id="rewardBadge" class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">Potential reward: — UGX</span>
-    </div>
-
-    <section class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl sm:p-8">
-      <h1 id="surveyTitle" class="text-2xl font-bold">Loading survey…</h1>
-      <p id="surveyDescription" class="mt-2 text-sm leading-6 text-slate-400">Please wait while we load the task.</p>
-
-      <div class="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs leading-5 text-amber-200">
-        Your answers are submitted for review. A displayed reward is not credited until the submission is checked and approved. Do not submit personal or payment details in your answers.
+<body class="min-h-screen antialiased">
+  <header class="sticky top-0 z-30 border-b border-[#333537] bg-[#0E0E10]/95 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+      <a href="/dashboard.html" class="flex items-center gap-3">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#A8C7FA] text-lg font-black text-[#101318]">T</span>
+        <span class="text-lg font-bold tracking-tight">TrainAI<span class="text-[#A8C7FA]">.ug</span></span>
+      </a>
+      <div class="flex items-center gap-3">
+        <span class="hidden text-xs text-[#9AA0A6] sm:inline">AI TASK WORKSPACE</span>
+        <a href="/dashboard.html" class="rounded-full border border-[#3C4043] px-4 py-2 text-sm font-medium text-[#D3D7DC] transition hover:bg-[#282A2C]">← Dashboard</a>
       </div>
+    </div>
+  </header>
 
-      <form id="surveyForm" class="mt-7 space-y-7">
-        <p id="loadingMessage" class="text-sm text-slate-400">Loading questions…</p>
-        <div id="questionList" class="space-y-7"></div>
-        <p id="formMessage" role="status" class="hidden rounded-lg p-3 text-sm"></p>
-        <button id="submitButton" type="submit" disabled class="w-full rounded-xl bg-sky-500 px-5 py-4 font-bold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50">
-          Submit answers for review
-        </button>
-      </form>
-    </section>
+  <main class="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:py-10">
+    <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span id="categoryBadge" class="rounded-full bg-[#A8C7FA]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#A8C7FA]">AI TRAINING</span>
+          <span class="rounded-full bg-[#81C995]/10 px-3 py-1 text-[11px] font-semibold text-[#81C995]">Human feedback task</span>
+        </div>
+        <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">AI Task <span class="gradient-text">Workspace</span></h1>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-[#9AA0A6]">Compare the responses carefully and choose the one that is more helpful, accurate and appropriate.</p>
+      </div>
+      <div class="gradient-pill rounded-2xl px-4 py-3">
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-[#A8C7FA]">Potential task reward</p>
+        <p id="rewardBadge" class="mt-1 text-lg font-bold text-[#E3E3E3]">— UGX</p>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <section class="surface min-w-0 rounded-3xl p-5 shadow-2xl sm:p-8">
+        <div class="mb-6 flex items-center justify-between gap-3 border-b border-[#333537] pb-5">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#9AA0A6]">Your assignment</p>
+            <h2 id="surveyTitle" class="mt-2 text-xl font-semibold sm:text-2xl">Loading task…</h2>
+          </div>
+          <div class="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#282A2C] text-[#A8C7FA] sm:grid">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+        </div>
+        <p id="surveyDescription" class="mb-6 text-sm leading-7 text-[#BDC1C6]">Please wait while we load the task details.</p>
+
+        <div class="mb-7 rounded-2xl border border-[#FDD663]/20 bg-[#FDD663]/[.06] p-4">
+          <div class="flex gap-3">
+            <span class="mt-0.5 text-[#FDD663]">ⓘ</span>
+            <div>
+              <p class="text-sm font-semibold text-[#FDD663]">Review and reward notice</p>
+              <p class="mt-1 text-xs leading-5 text-[#D6C99D]">Your answers are submitted for review. A displayed reward is not credited until the submission is checked and approved. Never include passwords, personal identification numbers or payment details in your answers.</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="surveyForm" class="space-y-7">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-[#E3E3E3]">Choose the better response</h3>
+            <span id="questionCount" class="text-xs text-[#9AA0A6]">Questions load below</span>
+          </div>
+          <p id="loadingMessage" class="rounded-xl bg-[#282A2C] p-4 text-sm text-[#9AA0A6]">Loading questions…</p>
+          <div id="questionList" class="space-y-7"></div>
+          <p id="formMessage" role="status" aria-live="polite" class="hidden rounded-xl p-4 text-sm"></p>
+          <button id="submitButton" type="submit" disabled class="w-full rounded-xl bg-[#A8C7FA] px-5 py-4 text-sm font-bold text-[#101318] transition hover:bg-[#C2D7FA]">Submit answers for review</button>
+        </form>
+      </section>
+
+      <aside class="space-y-4">
+        <section class="surface rounded-3xl p-5">
+          <div class="mb-4 flex items-center gap-2">
+            <span class="grid h-8 w-8 place-items-center rounded-xl bg-[#A8C7FA]/10 text-[#A8C7FA]">✦</span>
+            <h3 class="font-semibold">How to complete</h3>
+          </div>
+          <ol class="space-y-4">
+            <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#282A2C] text-xs font-bold text-[#A8C7FA]">1</span><p class="text-xs leading-5 text-[#BDC1C6]">Read each question and both responses carefully.</p></li>
+            <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#282A2C] text-xs font-bold text-[#A8C7FA]">2</span><p class="text-xs leading-5 text-[#BDC1C6]">Choose the response that best follows the prompt and gives useful information.</p></li>
+            <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#282A2C] text-xs font-bold text-[#A8C7FA]">3</span><p class="text-xs leading-5 text-[#BDC1C6]">Submit once. Your answers will be reviewed before any reward is credited.</p></li>
+          </ol>
+        </section>
+        <section class="muted-surface rounded-3xl p-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#9AA0A6]">What makes a good answer?</p>
+          <ul class="mt-3 space-y-2 text-xs leading-5 text-[#BDC1C6]">
+            <li>• Correct and relevant to the question</li>
+            <li>• Clear and easy to understand</li>
+            <li>• Safe, respectful and appropriate</li>
+            <li>• Follows the instructions given</li>
+          </ul>
+        </section>
+        <section class="rounded-3xl border border-[#333537] bg-[#131314] p-5">
+          <p class="text-sm font-semibold">Need help?</p>
+          <p class="mt-1 text-xs leading-5 text-[#9AA0A6]">If this task does not load or something looks wrong, return to your dashboard and contact support.</p>
+          <a href="/dashboard.html" class="mt-4 inline-flex text-xs font-semibold text-[#A8C7FA] hover:underline">Go to dashboard →</a>
+        </section>
+      </aside>
+    </div>
+    <footer class="py-8 text-center text-[11px] text-[#777D83]">TrainAI.ug · Honest feedback helps improve AI systems.</footer>
   </main>
 
   <script>
@@ -47,34 +122,42 @@
     const questionList = document.getElementById("questionList");
     const submitButton = document.getElementById("submitButton");
     const formMessage = document.getElementById("formMessage");
+    const loadingMessage = document.getElementById("loadingMessage");
     let currentQuestions = [];
+    let submissionComplete = false;
 
     function showMessage(message, isError = true) {
       formMessage.textContent = message;
-      formMessage.className = "rounded-lg p-3 text-sm " + (isError
-        ? "border border-rose-500/30 bg-rose-500/10 text-rose-300"
-        : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300");
+      formMessage.className = "rounded-xl border p-4 text-sm " + (isError
+        ? "border-[#F28B82]/30 bg-[#F28B82]/10 text-[#F5A9A3]"
+        : "border-[#81C995]/30 bg-[#81C995]/10 text-[#A8DDB4]");
     }
 
     function addChoice(container, questionIndex, choice, answerText) {
       const label = document.createElement("label");
-      label.className = "flex cursor-pointer gap-3 rounded-xl border border-slate-700 bg-slate-950 p-4 transition hover:border-sky-400";
+      label.className = "choice-card flex min-h-28 cursor-pointer gap-3 rounded-2xl p-4";
       const radio = document.createElement("input");
       radio.type = "radio";
       radio.name = "question_" + questionIndex;
       radio.value = choice;
       radio.required = true;
-      radio.className = "mt-1 accent-sky-400";
-      const text = document.createElement("span");
-      text.className = "text-sm leading-6 text-slate-300";
-      text.textContent = answerText;
-      label.append(radio, text);
+      radio.className = "mt-1 h-4 w-4 shrink-0 accent-[#A8C7FA]";
+      const content = document.createElement("span");
+      content.className = "min-w-0 flex-1";
+      const top = document.createElement("span");
+      top.className = "mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#A8C7FA]";
+      top.textContent = "Response " + choice;
+      const answer = document.createElement("span");
+      answer.className = "block whitespace-pre-wrap text-sm leading-6 text-[#D3D7DC]";
+      answer.textContent = typeof answerText === "string" ? answerText : "";
+      content.append(top, answer);
+      label.append(radio, content);
       container.append(label);
     }
 
     async function loadSurvey() {
       try {
-        const response = await fetch("/api/user", { credentials: "same-origin" });
+        const response = await fetch("/api/user", { credentials: "same-origin", cache: "no-store" });
         const data = await response.json();
         if (response.status === 401) {
           window.location.href = "/register.html";
@@ -82,29 +165,28 @@
         }
         if (!response.ok || !data.success) throw new Error(data.error || "Could not load your account.");
         const survey = (data.surveys || []).find(item => item.id === surveyId);
-        if (!survey) throw new Error("This survey is unavailable or has already been removed.");
+        if (!survey) throw new Error("This task is unavailable or has already been removed.");
 
-        document.getElementById("surveyTitle").textContent = survey.title;
+        document.getElementById("surveyTitle").textContent = survey.title || "AI training task";
         document.getElementById("surveyDescription").textContent = survey.description || "Compare the two AI responses and choose the one that best answers the prompt.";
         document.getElementById("categoryBadge").textContent = survey.category || "AI TRAINING";
-        document.getElementById("rewardBadge").textContent = "Potential reward: " + Number(survey.reward_ugx).toLocaleString() + " UGX";
-
+        document.getElementById("rewardBadge").textContent = Number(survey.reward_ugx || 0).toLocaleString() + " UGX";
         if ((data.completedIds || []).includes(surveyId)) {
-          throw new Error("You have already submitted this survey.");
+          throw new Error("You have already submitted this task.");
         }
 
         currentQuestions = JSON.parse(survey.questions_json || "[]");
         if (!Array.isArray(currentQuestions) || currentQuestions.length === 0) {
-          throw new Error("This survey has no questions yet. Please check back later.");
+          throw new Error("This task has no questions yet. Please check back later.");
         }
 
         questionList.replaceChildren();
         currentQuestions.forEach((item, index) => {
           const section = document.createElement("section");
-          section.className = "border-t border-slate-800 pt-6";
+          section.className = "border-t border-[#333537] pt-6";
           const heading = document.createElement("h2");
-          heading.className = "mb-4 font-semibold leading-6";
-          heading.textContent = (index + 1) + ". " + item.q;
+          heading.className = "mb-4 text-base font-semibold leading-7 text-[#E3E3E3]";
+          heading.textContent = (index + 1) + ". " + (item.q || "Choose the better response");
           const choices = document.createElement("div");
           choices.className = "grid gap-3 md:grid-cols-2";
           addChoice(choices, index, "A", item.a);
@@ -112,16 +194,18 @@
           section.append(heading, choices);
           questionList.append(section);
         });
-        document.getElementById("loadingMessage").remove();
+        document.getElementById("questionCount").textContent = currentQuestions.length + (currentQuestions.length === 1 ? " question" : " questions");
+        loadingMessage.remove();
         submitButton.disabled = false;
       } catch (error) {
-        document.getElementById("loadingMessage").textContent = error.message;
+        loadingMessage.textContent = error.message;
         submitButton.classList.add("hidden");
       }
     }
 
     form.addEventListener("submit", async event => {
       event.preventDefault();
+      if (submissionComplete) return;
       const answers = [];
       for (let index = 0; index < currentQuestions.length; index++) {
         const selected = form.querySelector('input[name="question_' + index + '"]:checked');
@@ -145,13 +229,15 @@
         });
         const result = await response.json();
         if (!response.ok || !result.success) throw new Error(result.error || "Submission failed.");
-        showMessage(result.message || "Your answers have been submitted for review.", false);
-        submitButton.textContent = "Submitted";
+        submissionComplete = true;
+        showMessage(result.message || "Your answers have been submitted for review. A reward is credited only after approval.", false);
+        submitButton.textContent = "Submitted successfully";
         const back = document.createElement("a");
         back.href = "/dashboard.html";
         back.textContent = "Return to dashboard";
-        back.className = "mt-4 inline-block font-semibold text-sky-400 hover:underline";
+        back.className = "block pt-2 text-center text-sm font-semibold text-[#A8C7FA] hover:underline";
         form.append(back);
+        form.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
       } catch (error) {
         showMessage(error.message);
         submitButton.disabled = false;
