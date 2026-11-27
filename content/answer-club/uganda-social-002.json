@@ -1,0 +1,217 @@
+{
+  "id": "UG-SOCIAL-002",
+  "title": "Uganda Culture, Community Life & Everyday Experiences — Set 02",
+  "country": "Uganda",
+  "country_code": "UG",
+  "format": "single_select_multiple_choice",
+  "audience": "Ugandan adults",
+  "status": "approved",
+  "approval": "Approved by the platform owner for publication; live publication requires the question-set publishing workflow to be connected and verified.",
+  "instructions": "Choose one option for each question. Opinion and experience questions have no right or wrong answer. For the mobile-money safety knowledge check, select the safest action. Do not enter names, phone numbers, exact addresses, account details or other identifying information.",
+  "questions": [
+    {
+      "id": "UGSOC0201",
+      "topic": "Community life",
+      "type": "opinion",
+      "question": "Which activity most often brings people in your community together?",
+      "options": {
+        "A": "Weddings or introduction ceremonies",
+        "B": "Religious gatherings",
+        "C": "Community meetings",
+        "D": "Sports or entertainment events"
+      }
+    },
+    {
+      "id": "UGSOC0202",
+      "topic": "Culture and heritage",
+      "type": "opinion",
+      "question": "Which cultural activity do you think younger generations should have more opportunities to learn?",
+      "options": {
+        "A": "Traditional music and dance",
+        "B": "Local languages and storytelling",
+        "C": "Traditional food preparation",
+        "D": "Cultural ceremonies and customs"
+      }
+    },
+    {
+      "id": "UGSOC0203",
+      "topic": "Community development",
+      "type": "opinion",
+      "question": "Which issue do you think most needs attention in many local communities?",
+      "options": {
+        "A": "Unemployment and limited job opportunities",
+        "B": "Poor roads and infrastructure",
+        "C": "Waste management",
+        "D": "Limited access to essential services"
+      }
+    },
+    {
+      "id": "UGSOC0204",
+      "topic": "Community communication",
+      "type": "experience",
+      "question": "How do you usually prefer to receive information about local community events?",
+      "options": {
+        "A": "WhatsApp groups or messages",
+        "B": "Radio announcements",
+        "C": "Local leaders or community meetings",
+        "D": "Facebook or other social media"
+      }
+    },
+    {
+      "id": "UGSOC0205",
+      "topic": "Family and social life",
+      "type": "opinion",
+      "question": "Which activity do you most enjoy during time with family?",
+      "options": {
+        "A": "Sharing meals",
+        "B": "Visiting relatives",
+        "C": "Attending family or community events",
+        "D": "Talking or relaxing together at home"
+      }
+    },
+    {
+      "id": "UGSOC0206",
+      "topic": "Friendship and social habits",
+      "type": "opinion",
+      "question": "What matters most when choosing a place to meet friends?",
+      "options": {
+        "A": "Affordable prices",
+        "B": "Convenient location",
+        "C": "A quiet and comfortable environment",
+        "D": "Food or entertainment options"
+      }
+    },
+    {
+      "id": "UGSOC0207",
+      "topic": "Family communication",
+      "type": "experience",
+      "question": "How do you most often communicate with relatives who live far away?",
+      "options": {
+        "A": "Voice calls",
+        "B": "WhatsApp or other text messages",
+        "C": "Video calls",
+        "D": "Social media platforms"
+      }
+    },
+    {
+      "id": "UGSOC0208",
+      "topic": "Transport",
+      "type": "experience",
+      "question": "Which form of transport do you use most often for everyday journeys?",
+      "options": {
+        "A": "Boda boda",
+        "B": "Taxi or matatu",
+        "C": "Private car",
+        "D": "Walking or cycling"
+      }
+    },
+    {
+      "id": "UGSOC0209",
+      "topic": "Transport",
+      "type": "opinion",
+      "question": "What is the most important factor when choosing transport for a journey?",
+      "options": {
+        "A": "Fare or total cost",
+        "B": "Safety",
+        "C": "Travel time",
+        "D": "Availability and convenience"
+      }
+    },
+    {
+      "id": "UGSOC0210",
+      "topic": "Mobile money safety",
+      "type": "opinion",
+      "question": "Which improvement would most help you feel safer when using mobile money?",
+      "options": {
+        "A": "Clear transaction notifications",
+        "B": "Simple ways to report fraud",
+        "C": "Helpful and responsive customer support",
+        "D": "More education about common scams"
+      }
+    },
+    {
+      "id": "UGSOC0211",
+      "topic": "Mobile money safety",
+      "type": "knowledge_check",
+      "question": "Someone calls and asks you to tell them your mobile-money PIN. What is the safest response?",
+      "options": {
+        "A": "Share it if the caller knows your name",
+        "B": "Share only part of the PIN",
+        "C": "Never share your PIN",
+        "D": "Send the PIN through WhatsApp"
+      },
+      "correct_answer": "C",
+      "explanation": "A mobile-money PIN is confidential. Do not share it with callers or anyone claiming to be a service provider."
+    },
+    {
+      "id": "UGSOC0212",
+      "topic": "Shopping",
+      "type": "experience",
+      "question": "What most influences your choice when buying everyday household products?",
+      "options": {
+        "A": "Price",
+        "B": "Product quality",
+        "C": "Trust in the seller",
+        "D": "Distance or delivery convenience"
+      }
+    },
+    {
+      "id": "UGSOC0213",
+      "topic": "Shopping and payments",
+      "type": "experience",
+      "question": "Which payment method do you most often prefer when shopping?",
+      "options": {
+        "A": "Cash",
+        "B": "MTN MoMo",
+        "C": "Airtel Money",
+        "D": "Bank card or bank transfer"
+      }
+    },
+    {
+      "id": "UGSOC0214",
+      "topic": "Local services",
+      "type": "opinion",
+      "question": "Which local service would you most like to see improved?",
+      "options": {
+        "A": "Healthcare services",
+        "B": "Water access",
+        "C": "Waste collection",
+        "D": "Public transport"
+      }
+    },
+    {
+      "id": "UGSOC0215",
+      "topic": "Community participation",
+      "type": "experience",
+      "question": "If you needed to report a local community problem, which channel would you be most likely to use first?",
+      "options": {
+        "A": "A local leader",
+        "B": "The responsible service provider",
+        "C": "A social media channel",
+        "D": "A community meeting"
+      }
+    },
+    {
+      "id": "UGSOC0216",
+      "topic": "Digital habits",
+      "type": "experience",
+      "question": "What is your main reason for using the internet on a typical day?",
+      "options": {
+        "A": "Education and learning",
+        "B": "Business or employment",
+        "C": "Communication and social media",
+        "D": "News and entertainment"
+      }
+    }
+  ],
+  "admin_review_checklist": [
+    "Confirm wording is clear, neutral and appropriate for the intended audience.",
+    "Confirm every question has exactly four single-select options.",
+    "Do not assign correct answers to opinion or experience questions.",
+    "Verify the mobile-money safety answer and explanation.",
+    "Confirm no question requests names, phone numbers, exact addresses, PINs or other identifying information.",
+    "Confirm the set is relevant to a broad range of Ugandan respondents.",
+    "Document the client purpose, funding, respondent eligibility and reward amount before attaching any rewards.",
+    "Keep rewards subject to verified funding and published eligibility; do not promise guaranteed earnings."
+  ]
+}
