@@ -69,6 +69,34 @@
 
 
 /* Uganda-first home experience */
+
+/* Requested typography: Gemini-style sans headings and Georgia body copy */
+.home-light-ui h1,.home-light-ui h2,.home-light-ui h3,.home-light-ui .home-brand{
+ font-family:"Google Sans","Product Sans",Arial,sans-serif;
+ font-size:28px;
+ font-weight:700;
+ letter-spacing:-.55px;
+ line-height:1.2;
+}
+.home-light-ui p,.home-light-ui .home-sub,.home-light-ui .home-task p,
+.home-light-ui .home-card p,.home-light-ui .home-reward p,
+.home-light-ui .home-trust .home-muted{
+ font-family:Georgia,"Times New Roman",serif;
+ font-size:22px;
+ font-weight:400;
+ line-height:1.55;
+}
+.home-light-ui .home-brand{font-size:28px}
+.home-light-ui .home-hero h1{font-size:28px}
+.home-light-ui .home-section h2{font-size:28px}
+.home-light-ui .home-task h3,.home-light-ui .home-reward h3{font-size:28px}
+@media(max-width:760px){
+ .home-light-ui p,.home-light-ui .home-sub,.home-light-ui .home-task p,
+ .home-light-ui .home-card p,.home-light-ui .home-reward p,
+ .home-light-ui .home-trust .home-muted{font-size:22px}
+ .home-light-ui h1,.home-light-ui h2,.home-light-ui h3{font-size:28px}
+}
+
 body.home-light{background:#f5f7f5;color:#172332;color-scheme:light}
 body.home-light .sidebar,body.home-light .topbar,body.home-light .mobile-nav,body.home-light .chat-fab{display:none!important}
 body.home-light .main{margin:0;min-height:100vh;background:#f5f7f5}
