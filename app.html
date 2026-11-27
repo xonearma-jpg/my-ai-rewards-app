@@ -165,7 +165,7 @@ function openWithdraw(){
  let step=1,amount=MIN_PAYOUT,submitting=false,showBalance=false,receipt=null,lastFocus=document.activeElement;
  const money=n=>Number(n||0).toLocaleString("en-UG")+" UGX";
  const publicRef=id=>"#WDL-"+String(id||"").replace(/-/g,"").toUpperCase();
- const close=()=>{root.innerHTML="";document.body.style.overflow="";if(lastFocus&&lastFocus.focus)lastFocus.focus()};
+ let onKey=null;const close=()=>{root.innerHTML="";document.body.style.overflow="";if(onKey)document.removeEventListener("keydown",onKey);if(lastFocus&&lastFocus.focus)lastFocus.focus()};
  const shell=(content)=>'<div class="checkout-backdrop" id="checkoutBackdrop"><section class="checkout-sheet" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle" aria-describedby="checkoutDescription" tabindex="-1"><div class="checkout-top"><div><div class="checkout-kicker">TrainAI · Mobile Money</div><h2 class="checkout-title" id="checkoutTitle">'+(step===1?"Withdraw funds":step===2?"Review your request":"Request received")+'</h2><p class="muted small" id="checkoutDescription">'+(step===1?"Choose an amount and confirm your saved payout destination.":step===2?"Check every detail before submitting.":"Your withdrawal request has been recorded.")+'</p></div><button type="button" class="btn btn-quiet" id="checkoutClose" aria-label="Close withdrawal checkout">×</button></div><div class="checkout-steps" aria-label="Checkout progress"><span class="'+(step>=1?"active":"")+'"></span><span class="'+(step>=2?"active":"")+'"></span><span class="'+(step>=3?"active":"")+'"></span></div>'+content+'</section></div>';
  const bindClose=()=>{document.getElementById("checkoutClose").onclick=close;document.getElementById("checkoutBackdrop").onclick=e=>{if(e.target.id==="checkoutBackdrop"&&!submitting)close()};};
  const renderAmount=()=>{
@@ -205,13 +205,9 @@ function openWithdraw(){
  root.innerHTML=shell("");
  document.body.style.overflow="hidden";
  renderAmount();
- const onKey=e=>{if(e.key==="Escape"&&!submitting){close();document.removeEventListener("keydown",onKey)}if(e.key==="Tab"){const panel=root.querySelector('[role="dialog"]');if(!panel)return;const focusables=[...panel.querySelectorAll('button:not(:disabled),input:not(:disabled),a[href]')];if(!focusables.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
+ onKey=e=>{if(e.key==="Escape"&&!submitting){close();document.removeEventListener("keydown",onKey)}if(e.key==="Tab"){const panel=root.querySelector('[role="dialog"]');if(!panel)return;const focusables=[...panel.querySelectorAll('button:not(:disabled),input:not(:disabled),a[href]')];if(!focusables.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
  document.addEventListener("keydown",onKey);
- const originalClose=close;
- const closeAndCleanup=()=>{document.removeEventListener("keydown",onKey);originalClose()};
- // Replace modal close handlers with the cleanup-aware close function.
- const watchClose=()=>{const x=document.getElementById("checkoutClose");if(x)x.onclick=closeAndCleanup;};
- const observer=new MutationObserver(watchClose);observer.observe(root,{childList:true,subtree:true});watchClose();
+
 }
 async function logout(){try{await post("/api/logout",{})}catch{}state.user=null;state.authenticated=false;navigate("/");}
 async function render(){const route=activeRoute();state.route=route;updateNav();if(route==="/"||route==="/index.html"){renderHome();return}if(route==="/auth"||route==="/register"||route==="/login"){if(state.authenticated){navigate("/dashboard");return}renderAuth();return}if(!state.authenticated){navigate("/auth");return}if(route==="/dashboard"){renderDashboard();return}if(route==="/tasks"||route==="/survey"){renderTasks();return}if(route==="/statements"||route==="/wallet"){renderStatements();return}if(route==="/support"){await renderSupport();return}if(route==="/profile"||route==="/settings"){renderProfile();return}if(route==="/referrals"){await renderReferrals();return}renderDashboard();}
