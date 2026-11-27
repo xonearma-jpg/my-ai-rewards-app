@@ -3,67 +3,196 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#020617" />
-  <title>Dashboard — TrainAI Uganda</title>
+  <meta name="theme-color" content="#0E0E10" />
+  <meta name="description" content="Your TrainAI.ug contributor dashboard: track approved rewards, AI tasks and starter bonus progress." />
+  <title>Dashboard — TrainAI.ug</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: {
+      canvas: '#0E0E10', surface: '#1E1F20', pill: '#282A2C',
+      line: '#333537', muted: '#A1A1AA', gemini: '#A8C7FA',
+      earned: '#81C995', pending: '#FDD663'
+    }}}};
+  </script>
+  <style>
+    html { color-scheme: dark; scroll-behavior: smooth; }
+    body { background: #0E0E10; }
+    .ai-gradient { background: linear-gradient(135deg,#4285F4,#9B72CB,#D96570); }
+    .surface { background: #1E1F20; border: 1px solid #333537; }
+    .nav-link[aria-current="page"] { background: #282A2C; color: #A8C7FA; }
+    .nav-link:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid #A8C7FA; outline-offset: 3px; }
+    @media (max-width: 639px) { body { padding-bottom: 78px; } }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="border-b border-slate-800 bg-slate-900">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
-      <a href="/dashboard.html" class="text-xl font-bold text-sky-400">TrainAI<span class="text-white">.ug</span></a>
-      <div class="flex items-center gap-4">
-        <a href="/wallet.html" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-medium">Wallet</a>
-        <button type="button" id="logoutBtn" class="text-xs text-slate-400 hover:text-white">Logout</button>
+<body class="min-h-screen bg-canvas font-sans text-slate-100 antialiased">
+  <div class="min-h-screen">
+    <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-[#131314] px-4 py-6 lg:flex">
+      <a href="/" class="mb-9 px-3 text-2xl font-bold tracking-tight text-gemini">TrainAI<span class="text-white">.ug</span></a>
+      <p class="px-3 pb-3 text-[10px] font-bold uppercase tracking-[.2em] text-zinc-500">Workspace</p>
+      <nav class="space-y-1" aria-label="Main navigation">
+        <a href="/dashboard.html" aria-current="page" class="nav-link flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-300">▦ <span>Dashboard</span></a>
+        <a href="/survey.html" class="nav-link flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-zinc-300 hover:bg-pill">✧ <span>AI tasks</span></a>
+        <a href="/wallet.html" class="nav-link flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-zinc-300 hover:bg-pill">▤ <span>Statements & wallet</span></a>
+        <a href="#support" id="sideSupport" class="nav-link flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-zinc-300 hover:bg-pill">◌ <span>Help & support</span></a>
+      </nav>
+      <div class="mt-auto rounded-2xl border border-line bg-surface p-4">
+        <div class="mb-2 inline-flex rounded-full ai-gradient px-2.5 py-1 text-[10px] font-bold text-white">AI CONTRIBUTOR</div>
+        <p class="text-sm font-semibold">Your work matters.</p>
+        <p class="mt-1 text-xs leading-5 text-zinc-400">Careful, thoughtful feedback helps improve AI systems.</p>
       </div>
+    </aside>
+
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-20 border-b border-line bg-[#0E0E10]/90 backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+          <a href="/" class="text-xl font-bold text-gemini lg:hidden">TrainAI<span class="text-white">.ug</span></a>
+          <div class="hidden lg:block">
+            <p class="text-xs text-zinc-500">Contributor workspace</p>
+            <p class="text-sm font-semibold">Your overview</p>
+          </div>
+          <div class="ml-auto flex items-center gap-3">
+            <span class="hidden text-xs text-zinc-400 sm:inline">UGX account</span>
+            <a href="/" class="rounded-full border border-line bg-surface px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-pill">Home</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
+        <section class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-gemini">Your workspace</p>
+            <h1 id="welcomeText" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Welcome back</h1>
+            <p class="mt-2 text-sm text-zinc-400">Review available tasks and keep track of approved rewards.</p>
+          </div>
+          <a href="/survey.html" class="inline-flex items-center justify-center gap-2 rounded-full bg-gemini px-5 py-3 text-sm font-bold text-[#101820] transition hover:bg-[#C3D8FA]">Find an AI task <span aria-hidden="true">↗</span></a>
+        </section>
+
+        <div id="pageError" role="alert" class="mb-6 hidden rounded-2xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-200"></div>
+
+        <section aria-label="Wallet overview" class="grid gap-4 xl:grid-cols-[1.2fr_.8fr]">
+          <article class="surface rounded-3xl p-6 sm:p-8">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-[.16em] text-zinc-400">Available rewards</span>
+              <span class="rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-earned">Approved</span>
+            </div>
+            <div id="availBalance" class="mt-4 text-4xl font-bold tracking-tight text-earned sm:text-5xl">— UGX</div>
+            <div class="mt-8">
+              <div class="flex items-center justify-between gap-3 text-sm">
+                <span class="font-semibold text-zinc-200">Progress to payout threshold</span>
+                <span id="thresholdPercent" class="text-xs text-zinc-400">0% of 25,000 UGX</span>
+              </div>
+              <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[#333537]">
+                <div id="thresholdBar" class="h-full rounded-full bg-[#81C995] transition-all duration-500" style="width:0%"></div>
+              </div>
+              <p id="thresholdRemaining" class="mt-3 text-xs text-zinc-400">Loading your available balance…</p>
+            </div>
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button id="withdrawButton" type="button" disabled class="cursor-not-allowed rounded-full bg-[#282A2C] px-5 py-3 text-sm font-semibold text-zinc-500">Withdraw via Mobile Money · Not active</button>
+              <p class="text-xs leading-5 text-zinc-500">Payout processing is paused while payment setup and testing are completed.</p>
+            </div>
+            <div class="mt-6 flex flex-wrap gap-2">
+              <span class="rounded-full border border-[#FFCC00]/30 bg-[#FFCC00]/10 px-3 py-1 text-[11px] font-semibold text-[#FFDC66]">MTN MoMo</span>
+              <span class="rounded-full border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-1 text-[11px] font-semibold text-[#FF8585]">Airtel Money</span>
+            </div>
+          </article>
+
+          <article class="surface rounded-3xl p-6 sm:p-8">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase tracking-[.16em] text-zinc-400">Starter bonus</span>
+              <span class="rounded-full ai-gradient px-3 py-1.5 text-xs font-bold text-white">5,000 UGX reserved</span>
+            </div>
+            <div id="lockedBalance" class="mt-4 text-3xl font-bold tracking-tight text-pending">— UGX</div>
+            <p class="mt-2 text-sm text-zinc-400">Complete 3 eligible AI tasks and have them approved to meet the stated bonus requirement.</p>
+            <div class="mt-7 flex items-center gap-2" aria-label="Three approved task milestones">
+              <div id="bonusStep1" class="h-2 flex-1 rounded-full bg-[#333537]"></div>
+              <div id="bonusStep2" class="h-2 flex-1 rounded-full bg-[#333537]"></div>
+              <div id="bonusStep3" class="h-2 flex-1 rounded-full bg-[#333537]"></div>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-xs">
+              <span class="text-zinc-400">Approved tasks</span>
+              <span id="bonusProgress" class="font-semibold text-pending">0 / 3 verified</span>
+            </div>
+            <p id="bonusNote" class="mt-5 rounded-xl border border-[#FDD663]/20 bg-[#FDD663]/5 p-3 text-xs leading-5 text-zinc-300">Only approved tasks count. Bonus release is subject to the platform's eligibility review.</p>
+          </article>
+        </section>
+
+        <section class="mt-8 grid gap-4 sm:grid-cols-3" aria-label="Account activity summary">
+          <article class="surface rounded-2xl p-5">
+            <p class="text-xs text-zinc-400">Approved surveys</p>
+            <p id="surveyCount" class="mt-2 text-2xl font-bold">—</p>
+            <p class="mt-1 text-xs text-zinc-500">Confirmed by review</p>
+          </article>
+          <article class="surface rounded-2xl p-5">
+            <p class="text-xs text-zinc-400">Open AI tasks</p>
+            <p id="availableCount" class="mt-2 text-2xl font-bold">—</p>
+            <p class="mt-1 text-xs text-zinc-500">Currently available to you</p>
+          </article>
+          <article class="surface rounded-2xl p-5">
+            <p class="text-xs text-zinc-400">Wallet records</p>
+            <p id="ledgerCount" class="mt-2 text-2xl font-bold">—</p>
+            <a href="/wallet.html" class="mt-1 inline-block text-xs text-gemini hover:underline">View statements →</a>
+          </article>
+        </section>
+
+        <section class="mt-10" aria-labelledby="tasksHeading">
+          <div class="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[.16em] text-gemini">Contribute</p>
+              <h2 id="tasksHeading" class="mt-1 text-xl font-bold">Available AI tasks</h2>
+            </div>
+            <a href="/wallet.html" class="text-xs font-semibold text-gemini hover:underline">View statements →</a>
+          </div>
+          <div id="surveyList" class="grid gap-4 md:grid-cols-2" aria-live="polite">
+            <div class="surface rounded-2xl p-5 text-sm text-zinc-400">Loading your tasks…</div>
+          </div>
+        </section>
+
+        <section class="mt-8 rounded-2xl border border-line bg-[#131314] p-5">
+          <p class="text-xs font-semibold text-zinc-300">A note about rewards</p>
+          <p class="mt-2 text-xs leading-6 text-zinc-500">Task rewards are credited only after valid submissions are reviewed and approved. The starter bonus is locked until eligibility is verified. Task availability and earnings are not guaranteed. Mobile Money payouts are not currently operational, and balances should not be treated as a promise of immediate payment.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[#131314]/95 px-2 py-2 backdrop-blur-xl sm:hidden" aria-label="Mobile navigation">
+    <div class="grid grid-cols-4 gap-1 text-center">
+      <a href="/dashboard.html" aria-current="page" class="rounded-xl bg-pill px-1 py-2 text-[10px] font-semibold text-gemini"><span class="block text-lg">▦</span>Dashboard</a>
+      <a href="/survey.html" class="rounded-xl px-1 py-2 text-[10px] font-semibold text-zinc-400"><span class="block text-lg">✧</span>Tasks</a>
+      <a href="/wallet.html" class="rounded-xl px-1 py-2 text-[10px] font-semibold text-zinc-400"><span class="block text-lg">▤</span>Statements</a>
+      <button id="mobileSupport" type="button" class="rounded-xl px-1 py-2 text-[10px] font-semibold text-zinc-400"><span class="block text-lg">◌</span>Support</button>
     </div>
   </nav>
 
-  <main class="max-w-5xl mx-auto px-6 py-10">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold" id="welcomeText">Welcome, Trainer</h1>
-      <p class="text-slate-400 text-sm mt-1">Complete available AI surveys. Rewards are credited after valid submissions are reviewed.</p>
+  <button id="supportBubble" type="button" aria-label="Open TrainAI support" class="fixed bottom-24 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full ai-gradient text-2xl font-bold text-white shadow-lg shadow-black/30 transition hover:scale-105 sm:bottom-6">✧</button>
+  <section id="supportDrawer" class="fixed bottom-40 right-5 z-50 hidden w-[min(350px,calc(100vw-2.5rem))] overflow-hidden rounded-3xl border border-line bg-[#1E1F20] shadow-2xl sm:bottom-24" aria-label="TrainAI support" aria-live="polite">
+    <div class="flex items-center justify-between border-b border-line p-4">
+      <div><p class="font-semibold">TrainAI support</p><p class="text-xs text-zinc-400">Quick help</p></div>
+      <button id="closeSupport" type="button" class="rounded-full bg-pill px-3 py-1 text-sm text-zinc-300" aria-label="Close support">✕</button>
     </div>
+    <div class="space-y-3 p-4">
+      <p class="text-xs leading-5 text-zinc-400">Choose a topic to see the current platform guidance.</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" data-support="payout" class="rounded-full bg-pill px-3 py-2 text-xs text-zinc-200 hover:bg-[#343638]">Payout timeline</button>
+        <button type="button" data-support="bonus" class="rounded-full bg-pill px-3 py-2 text-xs text-zinc-200 hover:bg-[#343638]">Unlock 5,000 UGX</button>
+        <button type="button" data-support="task" class="rounded-full bg-pill px-3 py-2 text-xs text-zinc-200 hover:bg-[#343638]">Report broken task</button>
+      </div>
+      <div id="supportAnswer" class="min-h-16 rounded-2xl border border-line bg-[#131314] p-3 text-xs leading-5 text-zinc-300">Hi! Select a topic above to get help.</div>
+    </div>
+  </section>
 
-    <section aria-label="Account summary" class="grid md:grid-cols-3 gap-6 mb-10">
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-xs text-slate-400 uppercase font-semibold">Available Balance</div>
-        <div class="text-3xl font-extrabold text-emerald-400 mt-2" id="availBalance">— UGX</div>
-        <a href="/wallet.html" class="inline-block text-xs text-sky-400 mt-3 hover:underline">Wallet and withdrawals →</a>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-xs text-slate-400 uppercase font-semibold">Locked Welcome Bonus</div>
-        <div class="text-3xl font-extrabold text-amber-400 mt-2" id="lockedBalance">— UGX</div>
-        <p class="text-xs text-slate-400 mt-3" id="unlockHint">Locked until eligibility requirements are met.</p>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div class="text-xs text-slate-400 uppercase font-semibold">Surveys Completed</div>
-        <div class="text-3xl font-extrabold text-sky-400 mt-2" id="surveyCount">—</div>
-        <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
-          <div id="progressBar" class="bg-sky-400 h-full transition-all" style="width:0%"></div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2 class="text-lg font-bold mb-4">Available AI Training Surveys</h2>
-      <div id="surveyList" class="grid md:grid-cols-2 gap-4" aria-live="polite">
-        <p class="text-slate-400 text-sm">Loading surveys...</p>
-      </div>
-      <p id="pageError" role="alert" class="text-rose-400 text-sm mt-4 hidden"></p>
-    </section>
-  </main>
+  <div id="payoutNotice" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-5" role="dialog" aria-modal="true" aria-labelledby="payoutNoticeTitle">
+    <div class="w-full max-w-sm rounded-3xl border border-line bg-[#1E1F20] p-6 shadow-2xl">
+      <div class="mb-3 inline-flex rounded-full bg-amber-300/10 px-3 py-1 text-xs font-bold text-pending">PAYOUTS NOT ACTIVE</div>
+      <h2 id="payoutNoticeTitle" class="text-xl font-bold">Mobile Money setup is paused</h2>
+      <p class="mt-3 text-sm leading-6 text-zinc-400">Your balance and progress are shown for tracking. Withdrawal requests are not being accepted until payment processing is configured, tested and funded. You do not need to enter your phone number or pay an activation fee.</p>
+      <button id="closePayoutNotice" type="button" class="mt-6 w-full rounded-full bg-gemini px-5 py-3 text-sm font-bold text-[#101820]">Got it</button>
+    </div>
+  </div>
 
   <script>
-    const userId = localStorage.getItem("trainai_user_id");
     const surveyList = document.getElementById("surveyList");
     const pageError = document.getElementById("pageError");
-
-    function logout() {
-      localStorage.removeItem("trainai_user_id");
-      window.location.href = "/index.html";
-    }
-
-    document.getElementById("logoutBtn").addEventListener("click", logout);
 
     function formatUGX(value) {
       const amount = Number(value);
@@ -71,7 +200,7 @@
     }
 
     function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       })[char]);
     }
@@ -81,68 +210,86 @@
       pageError.classList.remove("hidden");
     }
 
+    function setBonusProgress(count) {
+      const verified = Math.max(0, Math.min(3, Number(count) || 0));
+      document.getElementById("bonusProgress").textContent = verified + " / 3 verified";
+      [1,2,3].forEach(step => {
+        const bar = document.getElementById("bonusStep" + step);
+        bar.className = "h-2 flex-1 rounded-full " + (verified >= step ? "bg-[#81C995]" : "bg-[#333537]");
+      });
+    }
+
     async function loadDashboard() {
-      if (!userId) {
-        window.location.href = "/register.html";
-        return;
-      }
-
       try {
-        const res = await fetch("/api/user?userId=" + encodeURIComponent(userId), {
-          headers: { "Accept": "application/json" }
+        const response = await fetch("/api/user", {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" },
+          cache: "no-store"
         });
-        const data = await res.json().catch(() => ({}));
+        const data = await response.json().catch(() => ({}));
 
-        if (res.status === 401 || res.status === 403 || !data.success) {
-          logout();
+        if (response.status === 401 || response.status === 403) {
+          window.location.href = "/register.html";
           return;
         }
-        if (!res.ok) throw new Error(data.error || "Could not load your account.");
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Could not load your account.");
+        }
 
         const user = data.user || {};
         const surveys = Array.isArray(data.surveys) ? data.surveys : [];
         const completedIds = Array.isArray(data.completedIds) ? data.completedIds : [];
-        const completedCount = Number(user.surveys_completed) || 0;
+        const ledger = Array.isArray(data.ledger) ? data.ledger : [];
+        const available = Math.max(0, Number(user.available_balance_ugx) || 0);
+        const locked = Math.max(0, Number(user.locked_bonus_ugx) || 0);
+        const approvedCount = Math.max(0, Number(user.surveys_completed) || 0);
+        const target = 25000;
+        const remaining = Math.max(0, target - available);
+        const percent = Math.min(100, Math.round((available / target) * 100));
+        const openTasks = surveys.filter(task => !completedIds.includes(task.id));
 
-        document.getElementById("welcomeText").textContent =
-          "Welcome, " + (user.full_name || "Trainer");
-        document.getElementById("availBalance").textContent =
-          formatUGX(user.available_balance_ugx);
-        document.getElementById("lockedBalance").textContent =
-          formatUGX(user.locked_bonus_ugx);
-        document.getElementById("surveyCount").textContent =
-          completedCount + " / " + surveys.length;
+        document.getElementById("welcomeText").textContent = "Welcome, " + (user.full_name || "contributor");
+        document.getElementById("availBalance").textContent = formatUGX(available);
+        document.getElementById("lockedBalance").textContent = formatUGX(locked);
+        document.getElementById("thresholdPercent").textContent = percent + "% of 25,000 UGX";
+        document.getElementById("thresholdBar").style.width = percent + "%";
+        document.getElementById("thresholdRemaining").textContent = remaining > 0
+          ? formatUGX(remaining) + " more to reach the displayed 25,000 UGX threshold."
+          : "You have reached the displayed 25,000 UGX threshold.";
+        document.getElementById("surveyCount").textContent = approvedCount.toLocaleString("en-UG");
+        document.getElementById("availableCount").textContent = openTasks.length.toLocaleString("en-UG");
+        document.getElementById("ledgerCount").textContent = ledger.length.toLocaleString("en-UG");
+        setBonusProgress(approvedCount);
 
-        const progress = surveys.length
-          ? Math.min(100, Math.round((completedCount / surveys.length) * 100))
-          : 0;
-        document.getElementById("progressBar").style.width = progress + "%";
-
-        document.getElementById("unlockHint").textContent =
-          Number(user.locked_bonus_ugx) === 0
-            ? "Your bonus has been unlocked."
-            : "Bonus remains locked until the eligibility requirements are verified.";
+        document.getElementById("bonusNote").textContent = locked === 0
+          ? "Your account reports no locked starter bonus. Check your statements for the recorded bonus entry."
+          : approvedCount >= 3
+            ? "Your account shows three or more approved surveys. The bonus remains locked until the platform's eligibility review and unlock process is completed."
+            : "Only approved tasks count toward the stated three-task requirement. Your task submissions are reviewed before rewards are credited.";
 
         if (!surveys.length) {
-          surveyList.innerHTML = '<p class="text-slate-400 text-sm">There are no active surveys right now. Please check again later.</p>';
+          surveyList.innerHTML = '<div class="surface rounded-2xl p-6 text-sm text-zinc-400">There are no active tasks available right now. Please check again later.</div>';
           return;
         }
 
-        surveyList.innerHTML = surveys.map((survey) => {
-          const done = completedIds.includes(survey.id);
-          const surveyId = encodeURIComponent(String(survey.id));
+        surveyList.innerHTML = surveys.map(task => {
+          const done = completedIds.includes(task.id);
+          const id = encodeURIComponent(String(task.id));
           return `
-            <article class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex justify-between items-center gap-4">
+            <article class="surface flex items-center justify-between gap-4 rounded-2xl p-5 transition hover:border-[#55585B]">
               <div class="min-w-0">
-                <span class="text-xs font-semibold text-sky-400 uppercase">${escapeHTML(survey.category || "General")}</span>
-                <h3 class="font-bold text-base mt-1">${escapeHTML(survey.title || "AI survey")}</h3>
-                <div class="text-emerald-400 font-bold text-sm mt-2">Up to ${formatUGX(survey.reward_ugx)}</div>
-                <p class="text-slate-500 text-xs mt-1">Reward subject to valid completion and review.</p>
+                <div class="mb-2 flex flex-wrap items-center gap-2">
+                  <span class="rounded-full bg-[#282A2C] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gemini">${escapeHTML(task.category || "AI task")}</span>
+                  ${done ? '<span class="rounded-full bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold text-pending">In review / submitted</span>' : '<span class="rounded-full bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold text-earned">Available</span>'}
+                </div>
+                <h3 class="truncate text-base font-semibold">${escapeHTML(task.title || "AI training task")}</h3>
+                <p class="mt-2 text-sm text-zinc-400">${escapeHTML(task.description || "Review the task instructions and compare the responses.")}</p>
+                <p class="mt-3 text-sm font-semibold text-earned">Potential reward: ${formatUGX(task.reward_ugx)}</p>
               </div>
               ${done
-                ? '<span class="shrink-0 bg-slate-800 text-slate-400 text-xs font-semibold px-4 py-2 rounded-lg">Submitted ✓</span>'
-                : '<a href="/survey.html?id=' + surveyId + '" class="shrink-0 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition">Start</a>'
-              }
+                ? '<span class="shrink-0 rounded-full bg-[#282A2C] px-3 py-2 text-xs font-semibold text-zinc-400">Submitted ✓</span>'
+                : '<a href="/survey.html?id=' + id + '" class="shrink-0 rounded-full bg-gemini px-4 py-2.5 text-xs font-bold text-[#101820] hover:bg-[#C3D8FA]">Open task</a>'}
             </article>
           `;
         }).join("");
@@ -151,6 +298,37 @@
         surveyList.innerHTML = "";
       }
     }
+
+    const supportDrawer = document.getElementById("supportDrawer");
+    function openSupport() { supportDrawer.classList.remove("hidden"); }
+    function closeSupport() { supportDrawer.classList.add("hidden"); }
+    document.getElementById("supportBubble").addEventListener("click", openSupport);
+    document.getElementById("mobileSupport").addEventListener("click", openSupport);
+    document.getElementById("sideSupport").addEventListener("click", event => { event.preventDefault(); openSupport(); });
+    document.getElementById("closeSupport").addEventListener("click", closeSupport);
+
+    const supportAnswers = {
+      payout: "Mobile Money payouts are not active yet. No withdrawal request or payment is currently being processed. We will update the platform when payment setup is ready.",
+      bonus: "The 5,000 UGX starter bonus is locked. The stated requirement is three eligible AI tasks approved through review. Only approved tasks count; the platform must also complete its bonus unlock process.",
+      task: "Please note the task title and what went wrong. The support drawer is currently a guidance panel, not a live ticket service. Do not share passwords, PINs or payment secrets."
+    };
+    document.querySelectorAll("[data-support]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.getElementById("supportAnswer").textContent = supportAnswers[button.dataset.support];
+      });
+    });
+
+    const payoutNotice = document.getElementById("payoutNotice");
+    document.getElementById("withdrawButton").addEventListener("click", () => {
+      payoutNotice.classList.remove("hidden");
+      payoutNotice.classList.add("flex");
+    });
+    function closePayout() {
+      payoutNotice.classList.add("hidden");
+      payoutNotice.classList.remove("flex");
+    }
+    document.getElementById("closePayoutNotice").addEventListener("click", closePayout);
+    payoutNotice.addEventListener("click", event => { if (event.target === payoutNotice) closePayout(); });
 
     loadDashboard();
   </script>
